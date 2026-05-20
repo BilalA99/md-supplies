@@ -88,7 +88,8 @@ export function CategoryFilters({ filters, activeFilters, currentSort }: Props) 
     const params = new URLSearchParams()
     if (currentSort) params.set('sort', currentSort)
     nextFilters.forEach((f) => params.append('filter', f))
-    return `${pathname}?${params.toString()}`
+    const qs = params.toString()
+    return qs ? `${pathname}?${qs}` : pathname
   }
 
   const toggleFilter = (input: string) => {
