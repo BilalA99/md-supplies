@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { SlidersHorizontal, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { X, ChevronRight } from 'lucide-react'
 import { storefrontFetch } from '@/lib/shopify/storefront'
 import { GET_COLLECTION } from '@/lib/shopify/queries/collections'
 import type { Collection } from '@/lib/shopify/types'
@@ -210,26 +210,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           )}
 
           {/* Pagination */}
-          {(pageInfo.hasPreviousPage || pageInfo.hasNextPage) && (
-            <div className="flex items-center justify-center gap-4 pt-12">
-              {pageInfo.hasPreviousPage && (
-                <Link
-                  href={`/category/${slug}`}
-                  className="flex items-center gap-2 border border-navy-900 text-navy-900 text-[14px] font-semibold px-5 h-[44px] hover:bg-neutral-50 transition-colors"
-                >
-                  <ChevronLeft size={16} />
-                  Previous
-                </Link>
-              )}
-              {pageInfo.hasNextPage && (
-                <Link
-                  href={buildPageUrl(pageInfo.endCursor, 'after')}
-                  className="flex items-center gap-2 border border-navy-900 text-navy-900 text-[14px] font-semibold px-5 h-[44px] hover:bg-neutral-50 transition-colors"
-                >
-                  Next
-                  <ChevronRight size={16} />
-                </Link>
-              )}
+          {pageInfo.hasNextPage && (
+            <div className="flex items-center justify-center pt-12">
+              <Link
+                href={buildPageUrl(pageInfo.endCursor, 'after')}
+                className="flex items-center gap-2 border border-navy-900 text-navy-900 text-[14px] font-semibold px-5 h-[44px] hover:bg-neutral-50 transition-colors"
+              >
+                Load More
+                <ChevronRight size={16} />
+              </Link>
             </div>
           )}
         </div>
