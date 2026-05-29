@@ -8,6 +8,8 @@ import {
 import type { Product, CollectionProduct, ProductVariant } from '@/lib/shopify/types'
 import { VariantSelector } from './VariantSelector'
 import { AddToCartButton } from './AddToCartButton'
+import { RelatedArticles } from '@/components/blog/RelatedArticles'
+import type { BlogArticleSummary } from '@/lib/shopify/types'
 
 type Tab = 'DESCRIPTION' | 'SPECIFICATIONS' | 'ORDERING INFO' | 'REVIEWS'
 const TABS: Tab[] = ['DESCRIPTION', 'SPECIFICATIONS', 'ORDERING INFO', 'REVIEWS']
@@ -46,9 +48,10 @@ function RelatedProductCard({ product }: { product: CollectionProduct }) {
 interface Props {
   product: Product
   relatedProducts: CollectionProduct[]
+  relatedArticles?: BlogArticleSummary[]
 }
 
-export function ProductView({ product, relatedProducts }: Props) {
+export function ProductView({ product, relatedProducts, relatedArticles = [] }: Props) {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(
     () => getDefaultVariant(product.variants.nodes),
   )
@@ -458,6 +461,7 @@ export function ProductView({ product, relatedProducts }: Props) {
           </div>
         </section>
       )}
+      <RelatedArticles articles={relatedArticles} heading="From Our Blog" />
     </>
   )
 }
