@@ -24,15 +24,18 @@ export default function BlogLoading() {
       {/* Blog grid skeleton */}
       <section className="w-full bg-neutral-100">
         <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pb-20 md:pb-24">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[22px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[22px] gap-y-0">
             {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="flex flex-col gap-3 mb-10">
-                <Skeleton className="aspect-[16/9] w-full" />
-                <Skeleton className="h-3 w-28" />
-                <Skeleton className="h-5 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
+              <article key={i} className="flex flex-col">
+                {/* Dark header — matches BlogCard h-[152px] */}
+                <Skeleton className="h-[152px] w-full" />
+                {/* White body — matches BlogCard h-[155px] */}
+                <div className="bg-white h-[155px] px-7 pt-[35px] pb-[43px] flex flex-col gap-[18px]">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </article>
             ))}
           </div>
         </div>
