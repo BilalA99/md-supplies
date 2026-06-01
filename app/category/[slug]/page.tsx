@@ -5,9 +5,13 @@ import { X, ChevronRight } from 'lucide-react'
 import { storefrontFetch } from '@/lib/shopify/storefront'
 import { GET_COLLECTION } from '@/lib/shopify/queries/collections'
 import type { Collection } from '@/lib/shopify/types'
-import { ShopifyProductCard } from '@/components/store/ShopifyProductCard'
 import { CategoryFilters } from '@/components/category/CategoryFilters'
 import { CategorySort } from '@/components/category/CategorySort'
+import { ProductGrid } from '@/components/category/ProductGrid'
+import { CategoryPagination } from '@/components/category/CategoryPagination'
+import { FilterDrawer } from '@/components/category/FilterDrawer'
+import { buildMetadata } from '@/lib/seo'
+import { ROUTES } from '@/lib/routes'
 
 export const revalidate = 30
 
@@ -17,16 +21,17 @@ interface Props {
     sort?: string
     after?: string
     filter?: string | string[]
+    page?: string
   }>
 }
 
 function parseSortKey(sort?: string): { sortKey: string; reverse: boolean } {
   switch (sort) {
-    case 'PRICE_ASC':  return { sortKey: 'PRICE', reverse: false }
-    case 'PRICE_DESC': return { sortKey: 'PRICE', reverse: true }
+    case 'PRICE_ASC':    return { sortKey: 'PRICE', reverse: false }
+    case 'PRICE_DESC':   return { sortKey: 'PRICE', reverse: true }
     case 'BEST_SELLING': return { sortKey: 'BEST_SELLING', reverse: false }
-    case 'CREATED':    return { sortKey: 'CREATED', reverse: true }
-    default:           return { sortKey: 'COLLECTION_DEFAULT', reverse: false }
+    case 'CREATED':      return { sortKey: 'CREATED', reverse: true }
+    default:             return { sortKey: 'COLLECTION_DEFAULT', reverse: false }
   }
 }
 
@@ -46,18 +51,56 @@ function parseFilters(filterStrings: string[]): Record<string, unknown>[] {
   })
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+// TODO(data-team): replace with real subcategory list from Shopify metafields
+const SUBCATEGORY_STUBS: { label: string; slug: string }[] = []
+// TODO(data-team): replace with real related category list from Shopify metafields
+const RELATED_CATEGORY_STUBS: { label: string; slug: string }[] = []
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
+  const sp = await searchParams
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mdsupplies.com'
+
+  const activeFilterStrings = parseFilterParam(sp.filter)
+  const isFiltered = activeFilterStrings.length > 0 || Boolean(sp.sort)
+  const currentPage = parseInt(sp.page ?? '1', 10)
+
   try {
     const data = await storefrontFetch<{ collection: Collection | null }>(
       GET_COLLECTION,
       { handle: slug, first: 1 },
     )
     if (!data.collection) return { title: 'Category | MD Supplies' }
-    return {
-      title: `${data.collection.title} | MD Supplies`,
-      description: data.collection.description || `Shop ${data.collection.title} at wholesale prices`,
+    const { title, description } = data.collection
+
+    // Rule 3: filtered or sorted → noindex, canonical to clean base
+    if (isFiltered) {
+      return buildMetadata({
+        pageType: 'category',
+        title,
+        description: description || undefined,
+        canonical: `${base}/category/${slug}`,
+        noindex: true,
+      })
     }
+
+    // Rule 2: paginated → index, canonical to self (with page + cursor)
+    if (currentPage > 1) {
+      return buildMetadata({
+        pageType: 'category',
+        title,
+        description: description || undefined,
+        canonical: `${base}/category/${slug}?page=${currentPage}&after=${sp.after ?? ''}`,
+      })
+    }
+
+    // Rule 1: clean page 1 → index, canonical computed from slug
+    return buildMetadata({
+      pageType: 'category',
+      title,
+      slug,
+      description: description || undefined,
+    })
   } catch {
     return { title: 'Category | MD Supplies' }
   }
@@ -69,10 +112,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   const activeFilterStrings = parseFilterParam(sp.filter)
   const { sortKey, reverse } = parseSortKey(sp.sort)
+  const currentPage = parseInt(sp.page ?? '1', 10)
+  const isFiltered = activeFilterStrings.length > 0 || Boolean(sp.sort)
 
   const data = await storefrontFetch<{ collection: Collection | null }>(GET_COLLECTION, {
     handle: slug,
-    first: 24,
+    first: 9,
     after: sp.after ?? null,
     sortKey,
     reverse,
@@ -86,14 +131,6 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const { pageInfo } = collection.products
   const filters = collection.products.filters ?? []
 
-  const buildPageUrl = (cursor: string | null | undefined, direction: 'after') => {
-    const p = new URLSearchParams()
-    if (sp.sort) p.set('sort', sp.sort)
-    activeFilterStrings.forEach((f) => p.append('filter', f))
-    if (cursor) p.set(direction, cursor)
-    return `/category/${slug}?${p.toString()}`
-  }
-
   const removeFilterUrl = (filterToRemove: string) => {
     const next = activeFilterStrings.filter((f) => f !== filterToRemove)
     const p = new URLSearchParams()
@@ -103,12 +140,20 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     return qs ? `/category/${slug}?${qs}` : `/category/${slug}`
   }
 
+  const loadMoreUrl = (() => {
+    const p = new URLSearchParams()
+    if (sp.sort) p.set('sort', sp.sort)
+    activeFilterStrings.forEach((f) => p.append('filter', f))
+    if (pageInfo.endCursor) p.set('after', pageInfo.endCursor)
+    return `/category/${slug}?${p.toString()}`
+  })()
+
   return (
     <main className="bg-[#f9fafc] min-h-screen">
       {/* Breadcrumb */}
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-5">
-        <nav className="flex items-center gap-2 text-[15px] tracking-[0.3px] flex-wrap">
-          <Link href="/" className="text-gray-500 hover:text-navy-900 transition-colors">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[15px] tracking-[0.3px] flex-wrap">
+          <Link href={ROUTES.home} className="text-gray-500 hover:text-navy-900 transition-colors">
             Home
           </Link>
           <span className="text-gray-500">›</span>
@@ -116,7 +161,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </nav>
       </div>
 
-      {/* Hero */}
+      {/* Hero — with image */}
       {collection.image && (
         <div className="relative bg-navy-900 overflow-hidden h-[220px] sm:h-[280px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -129,23 +174,30 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <h1 className="text-white text-[28px] sm:text-[36px] font-bold leading-tight">
               {collection.title}
             </h1>
-            <p className="text-white/70 text-[15px] mt-2">
-              {products.length === 24 ? '24+' : products.length} products
-            </p>
+            {collection.description && (
+              <p className="text-white/70 text-[15px] mt-2 max-w-2xl">
+                {collection.description}
+              </p>
+            )}
           </div>
         </div>
       )}
 
+      {/* Hero — no image fallback */}
       {!collection.image && (
         <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pb-4">
           <h1 className="text-navy-900 text-[26px] font-bold">{collection.title}</h1>
-          <p className="text-gray-500 text-[15px] mt-1">{products.length} products</p>
+          {collection.description && (
+            <p className="text-gray-500 text-[15px] mt-1 max-w-2xl">
+              {collection.description}
+            </p>
+          )}
         </div>
       )}
 
       {/* Main layout */}
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-8 flex gap-0 items-start">
-        {/* Desktop sidebar */}
+        {/* Desktop filter sidebar */}
         <aside className="hidden lg:block w-[280px] shrink-0 pr-10 sticky top-[140px]">
           <CategoryFilters
             filters={filters}
@@ -158,10 +210,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <div className="flex-1 min-w-0">
           {/* Sort bar */}
           <div className="flex justify-end mb-6">
-            <CategorySort
-              currentSort={sp.sort}
-              activeFilters={activeFilterStrings}
-            />
+            <CategorySort currentSort={sp.sort} activeFilters={activeFilterStrings} />
           </div>
 
           {/* Active filter chips */}
@@ -169,17 +218,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <div className="flex flex-wrap gap-2 mb-6">
               {activeFilterStrings.map((f) => {
                 let label = f
-                try {
-                  const parsed = JSON.parse(f)
-                  label = Object.values(parsed).join(', ')
-                } catch {}
+                try { label = String(Object.values(JSON.parse(f)).join(', ')) } catch { /* keep raw */ }
                 return (
                   <Link
                     key={f}
                     href={removeFilterUrl(f)}
                     className="flex items-center gap-1 bg-navy-900 text-white text-[12px] font-medium px-3 h-[28px] hover:bg-navy-950 transition-colors"
                   >
-                    {String(label)}
+                    {label}
                     <X size={11} />
                   </Link>
                 )
@@ -187,33 +233,34 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             </div>
           )}
 
+          {/* Mobile filter drawer */}
+          <FilterDrawer
+            filters={filters}
+            activeFilters={activeFilterStrings}
+            currentSort={sp.sort}
+          />
+
           {/* Product grid */}
-          {products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-[23px]">
-              {products.map((product) => (
-                <ShopifyProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <p className="text-navy-900 text-[20px] font-semibold">No products found</p>
-              <p className="text-gray-500 text-[15px]">
-                Try adjusting or clearing your filters.
-              </p>
-              <Link
-                href={`/category/${slug}`}
-                className="mt-2 border border-navy-900 text-navy-900 text-[15px] font-semibold px-6 h-[44px] flex items-center hover:bg-neutral-50 transition-colors"
-              >
-                Clear all filters
-              </Link>
-            </div>
+          <ProductGrid
+            products={products}
+            emptyStateHref={ROUTES.category(slug)}
+          />
+
+          {/* Clean-page pagination (real anchor links, SEO-indexable) */}
+          {!isFiltered && (
+            <CategoryPagination
+              currentPage={currentPage}
+              hasNext={pageInfo.hasNextPage}
+              nextCursor={pageInfo.endCursor ?? null}
+              baseUrl={ROUTES.category(slug)}
+            />
           )}
 
-          {/* Pagination */}
-          {pageInfo.hasNextPage && (
+          {/* Filtered/sorted pages: cursor-based Load More (noindex, not paginated) */}
+          {isFiltered && pageInfo.hasNextPage && (
             <div className="flex items-center justify-center pt-12">
               <Link
-                href={buildPageUrl(pageInfo.endCursor, 'after')}
+                href={loadMoreUrl}
                 className="flex items-center gap-2 border border-navy-900 text-navy-900 text-[14px] font-semibold px-5 h-[44px] hover:bg-neutral-50 transition-colors"
               >
                 Load More
@@ -224,7 +271,47 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      {/* About section */}
+      {/* Subcategory grid — hidden until data team populates SUBCATEGORY_STUBS */}
+      {SUBCATEGORY_STUBS.length > 0 && (
+        <section className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-10 border-t border-gray-200">
+          <h2 className="text-navy-900 text-[20px] font-semibold mb-6">
+            Browse by Subcategory
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {SUBCATEGORY_STUBS.map((sub) => (
+              <Link
+                key={sub.slug}
+                href={ROUTES.subcategory(slug, sub.slug)}
+                className="border border-gray-200 bg-white text-navy-900 text-[14px] font-medium px-4 py-3 text-center hover:border-navy-900 transition-colors"
+              >
+                {sub.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Related categories — hidden until data team populates RELATED_CATEGORY_STUBS */}
+      {RELATED_CATEGORY_STUBS.length > 0 && (
+        <section className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-8">
+          <h2 className="text-navy-900 text-[18px] font-semibold mb-4">
+            Related Categories
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {RELATED_CATEGORY_STUBS.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={ROUTES.category(cat.slug)}
+                className="border border-gray-200 bg-white text-navy-900 text-[14px] px-4 py-2 hover:border-navy-900 transition-colors"
+              >
+                {cat.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Bottom SEO copy */}
       {collection.descriptionHtml && (
         <section className="bg-white border-t border-gray-200 py-14">
           <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14">
@@ -238,6 +325,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           </div>
         </section>
       )}
+
+      {/* Schema slot — A5 (Discovery Schema ticket) fills this with CollectionPage + BreadcrumbList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({}) }}
+      />
     </main>
   )
 }
