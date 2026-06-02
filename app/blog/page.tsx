@@ -5,14 +5,14 @@ import { FadeIn } from "@/components/ui/FadeIn";
 import { storefrontFetch } from "@/lib/shopify/storefront";
 import { GET_BLOGS_WITH_ARTICLES } from "@/lib/shopify/queries/blog";
 import type { ShopifyBlog, BlogArticleSummary } from "@/lib/shopify/types";
+import { buildMetadata } from '@/lib/seo'
+import { WebPageSchema } from '@/components/schema/WebPageSchema'
+import { BreadcrumbSchema } from '@/components/schema/BreadcrumbSchema'
+import { SITE_URL } from '@/lib/seo/constants'
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Blog | MD Supplies",
-  description:
-    "Tips, guides, and industry updates for healthcare professionals and facility managers.",
-};
+export const metadata: Metadata = buildMetadata({ pageType: 'blog-hub' })
 
 export default async function BlogPage() {
   let articles: BlogArticleSummary[] = [];
@@ -29,6 +29,17 @@ export default async function BlogPage() {
 
   return (
     <main>
+      <WebPageSchema
+        name="MDSupplies Blog"
+        description="Tips, guides, and industry updates for healthcare professionals and facility managers."
+        url={`${SITE_URL}/blog`}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', item: SITE_URL },
+          { name: 'Blog', item: `${SITE_URL}/blog` },
+        ]}
+      />
       {/* ── Page header ── */}
       <section className="w-full bg-neutral-100">
         <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pt-16 md:pt-20 lg:pt-24 pb-12 md:pb-16">
