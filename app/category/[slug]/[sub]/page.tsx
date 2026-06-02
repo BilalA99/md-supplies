@@ -161,7 +161,7 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-5">
         <Breadcrumb
           items={[
-            { label: slug.replace(/-/g, ' '), href: ROUTES.category(slug) },
+            { label: slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()), href: ROUTES.category(slug) },
             { label: collection.title },
           ]}
         />

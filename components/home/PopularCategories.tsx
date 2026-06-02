@@ -53,7 +53,7 @@ export function PopularCategories({ collections }: Props) {
           {collections.map(({ id, title, handle, image }) => (
             <motion.div key={id} variants={itemVariants}>
               <Link
-                href={`/category/${handle}`}
+                href={ROUTES.category(handle)}
                 className="group bg-white hover:bg-neutral-50 transition-colors flex flex-col items-center justify-center gap-4 py-10 px-4 h-full"
               >
                 <div className="w-[50px] h-[50px] rounded-xl bg-[rgba(0,193,255,0.15)] flex items-center justify-center overflow-hidden group-hover:bg-[rgba(0,193,255,0.25)] transition-colors">

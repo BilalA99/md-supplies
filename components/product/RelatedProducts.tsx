@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { RelatedProduct } from '@/types/product'
+import { ROUTES } from '@/lib/routes'
 
 function formatCents(cents: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100)
@@ -21,7 +22,7 @@ export function RelatedProducts({ products }: Props) {
         {products.map((product) => (
           <Link
             key={product.handle}
-            href={`/products/${product.handle}`}
+            href={ROUTES.product(product.handle)}
             className="group flex flex-col gap-3 bg-white border border-gray-200 rounded-lg p-3 hover:border-teal-500 transition-colors"
           >
             <div className="aspect-square bg-neutral-50 rounded overflow-hidden">
