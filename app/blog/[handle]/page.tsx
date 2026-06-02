@@ -13,6 +13,10 @@ import type { BlogArticle, ShopifyBlog, BlogArticleSummary } from "@/lib/shopify
 import { WholesalePricing } from "@/components/home/WholesalePricing";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { MoreArticles } from "@/components/blog/MoreArticles";
+import { buildMetadata } from '@/lib/seo'
+import { BlogPostingSchema } from '@/components/schema/BlogPostingSchema'
+import { BreadcrumbSchema } from '@/components/schema/BreadcrumbSchema'
+import { SITE_URL } from '@/lib/seo/constants'
 
 export const revalidate = 3600;
 
@@ -60,26 +64,26 @@ export async function generateStaticParams() {
 // ─── generateMetadata ───────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { handle } = await params;
+  const { handle } = await params
   try {
-    const found = await findArticle(handle);
-    if (!found) return { title: "Article | MD Supplies Blog" };
-    const { article } = found;
-    return {
-      title: `${article.title} | MD Supplies Blog`,
+    const found = await findArticle(handle)
+    if (!found) return {}
+    const { article } = found
+    return buildMetadata({
+      pageType: 'blog-article',
+      title: article.title,
       description: article.excerpt?.slice(0, 155) ?? undefined,
-      openGraph: article.image
-        ? { images: [{ url: article.image.url, alt: article.image.altText ?? article.title }] }
-        : undefined,
-    };
+      slug: handle,
+      image: article.image?.url,
+    })
   } catch {
-    return { title: "Article | MD Supplies Blog" };
+    return {}
   }
 }
 
 // ─── Page ───────────────────────────────────────────────────────────────────
 
-export default async function ArticlePage({ params }: Props) {
+export default async function ShopifyArticlePage({ params }: Props) {
   const { handle } = await params;
 
   const found = await findArticle(handle).catch(() => null);
@@ -108,8 +112,28 @@ export default async function ArticlePage({ params }: Props) {
     year: "numeric",
   });
 
+  const pageUrl = `${SITE_URL}/blog/${handle}`
+  const publisherLogo = `${SITE_URL}/images/og-default.jpg`
+
   return (
     <main className="bg-[#f9fafc]">
+      <BlogPostingSchema
+        title={article.title}
+        description={article.excerpt ?? article.title}
+        url={pageUrl}
+        featuredImage={article.image?.url ?? publisherLogo}
+        publishedAt={article.publishedAt}
+        authorName={article.author.name}
+        publisherName="MDSupplies"
+        publisherLogo={publisherLogo}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', item: SITE_URL },
+          { name: 'Blog', item: `${SITE_URL}/blog` },
+          { name: article.title, item: pageUrl },
+        ]}
+      />
       {/* Breadcrumb */}
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-5">
         <nav className="flex items-center gap-2 text-[15px] tracking-[0.3px]">
