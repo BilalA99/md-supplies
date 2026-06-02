@@ -3,12 +3,14 @@ import Link from 'next/link'
 import { storefrontFetch } from '@/lib/shopify/storefront'
 import { GET_COLLECTIONS } from '@/lib/shopify/queries/collections'
 import { ROUTES } from '@/lib/routes'
+import { Breadcrumb } from '@/components/layout/Breadcrumb'
+import { ShopByIndustry } from '@/components/home/ShopByIndustry'
 
 export const revalidate = 60
 
 export const metadata: Metadata = {
-  title: 'All Categories | MD Supplies',
-  description: 'Browse all medical supply categories at wholesale prices.',
+  title: 'All Medical Supply Categories | MD Supplies',
+  description: 'Browse all medical supply categories at wholesale prices — gloves, wound care, needles, IV therapy, and more. Serving clinics, urgent care, and B2B buyers.',
 }
 
 type CollectionNode = {
@@ -28,27 +30,68 @@ export default async function CategoriesPage() {
     )
     collections = data.collections.nodes
   } catch {
-    // Degrade gracefully — render empty state rather than error
+    // degrade gracefully — render empty state
   }
+
+  const popularCollections = collections.slice(0, 8)
 
   return (
     <main className="bg-[#f9fafc] min-h-screen">
       {/* Breadcrumb */}
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-5">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[15px] tracking-[0.3px]">
-          <Link href={ROUTES.home} className="text-gray-500 hover:text-navy-900 transition-colors">
-            Home
-          </Link>
-          <span className="text-gray-500">›</span>
-          <span className="text-navy-900 font-semibold">All Categories</span>
-        </nav>
+        <Breadcrumb items={[{ label: 'All Categories' }]} />
       </div>
 
-      <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pb-16">
-        <h1 className="text-navy-900 text-[32px] font-bold mb-2">All Categories</h1>
-        <p className="text-gray-500 text-[15px] mb-10">
-          Browse our full range of medical supplies by category.
+      {/* Hero */}
+      <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pb-10">
+        <h1 className="text-navy-900 text-[32px] sm:text-[40px] font-bold leading-tight mb-3">
+          All Medical Supply Categories
+        </h1>
+        <p className="text-gray-500 text-[16px] max-w-2xl leading-relaxed">
+          Browse our complete catalog of wholesale medical supplies — from gloves to IV therapy,
+          organized for fast ordering. Trusted by clinics, urgent care centers, and B2B buyers nationwide.
         </p>
+      </div>
+
+      {/* Popular Categories strip */}
+      {popularCollections.length > 0 && (
+        <section className="bg-white border-t border-b border-gray-100 py-10">
+          <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14">
+            <h2 className="text-navy-900 text-[22px] font-semibold mb-7">Popular Categories</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-[1px] border border-[rgba(0,0,0,0.08)] bg-[rgba(0,0,0,0.08)]">
+              {popularCollections.map((col) => (
+                <Link
+                  key={col.id}
+                  href={ROUTES.category(col.handle)}
+                  className="group bg-white hover:bg-neutral-50 transition-colors flex flex-col items-center justify-center gap-4 py-8 px-4 h-full"
+                >
+                  <div className="w-[50px] h-[50px] rounded-xl bg-[rgba(0,193,255,0.15)] flex items-center justify-center overflow-hidden group-hover:bg-[rgba(0,193,255,0.25)] transition-colors">
+                    {col.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={col.image.url}
+                        alt={col.image.altText ?? col.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-teal-500 text-[20px] font-bold">
+                        {col.title.charAt(0)}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[14px] font-semibold text-navy-900 text-center leading-snug">
+                    {col.title}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* All Categories grid */}
+      <section className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-12">
+        <h2 className="text-navy-900 text-[22px] font-semibold mb-7">Browse All Categories</h2>
 
         {collections.length === 0 ? (
           <p className="text-gray-500 text-[15px]">No categories found.</p>
@@ -68,7 +111,9 @@ export default async function CategoriesPage() {
                     className="w-full aspect-[4/3] object-cover"
                   />
                 ) : (
-                  <div className="w-full aspect-[4/3] bg-navy-900/5" />
+                  <div className="w-full aspect-[4/3] bg-navy-900/5 flex items-center justify-center">
+                    <span className="text-navy-900/20 text-[36px] font-bold">{col.title.charAt(0)}</span>
+                  </div>
                 )}
                 <div className="px-4 py-3">
                   <p className="text-navy-900 text-[14px] font-semibold group-hover:underline">
@@ -84,7 +129,10 @@ export default async function CategoriesPage() {
             ))}
           </div>
         )}
-      </div>
+      </section>
+
+      {/* Shop by Industry */}
+      <ShopByIndustry />
     </main>
   )
 }
