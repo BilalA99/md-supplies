@@ -26,7 +26,7 @@ export function ArticlePage({ article }: Props) {
   const hasTOC = article.tableOfContents && article.tableOfContents.length > 0
 
   return (
-    <main className="bg-[#f9fafc]">
+    <main id="main-content" className="bg-[#f9fafc]">
       <BlogPostingSchema
         title={article.seoTitle || article.title}
         description={article.seoDescription || article.excerpt}

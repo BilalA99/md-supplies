@@ -14,7 +14,7 @@ export function PartnerDetail({ partner }: Props) {
   const pageDescription = partner.seoDescription || partner.description
 
   return (
-    <main className="bg-[#f9fafc]">
+    <main id="main-content" className="bg-[#f9fafc]">
       <WebPageSchema
         name={partner.seoTitle || partner.name}
         description={pageDescription}

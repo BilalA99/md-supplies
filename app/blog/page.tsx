@@ -28,7 +28,7 @@ export default async function BlogPage() {
   }
 
   return (
-    <main>
+    <main id="main-content">
       <WebPageSchema
         name="MDSupplies Blog"
         description="Tips, guides, and industry updates for healthcare professionals and facility managers."

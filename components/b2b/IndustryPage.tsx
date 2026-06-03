@@ -16,7 +16,7 @@ export function IndustryPage({ industry }: Props) {
   const pageDescription = industry.seoDescription || industry.intro
 
   return (
-    <main className="bg-[#f9fafc]">
+    <main id="main-content" className="bg-[#f9fafc]">
       <WebPageSchema
         name={industry.seoTitle || pageTitle}
         description={pageDescription}

@@ -15,7 +15,7 @@ export function OCCHubPage({ hub }: Props) {
   const pageDescription = hub.seoDescription || hub.intro
 
   return (
-    <main className="bg-[#f9fafc]">
+    <main id="main-content" className="bg-[#f9fafc]">
       <WebPageSchema
         name={hub.seoTitle || hub.title}
         description={pageDescription}

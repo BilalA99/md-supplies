@@ -116,7 +116,7 @@ export default async function ShopifyArticlePage({ params }: Props) {
   const publisherLogo = `${SITE_URL}/images/og-default.jpg`
 
   return (
-    <main className="bg-[#f9fafc]">
+    <main id="main-content" className="bg-[#f9fafc]">
       <BlogPostingSchema
         title={article.title}
         description={article.excerpt ?? article.title}

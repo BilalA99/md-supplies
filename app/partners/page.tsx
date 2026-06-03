@@ -12,7 +12,7 @@ export default function PartnersPage() {
   const partners = getActivePartners()
 
   return (
-    <main className="bg-[#f9fafc]">
+    <main id="main-content" className="bg-[#f9fafc]">
       <WebPageSchema
         name="Our Partners"
         description="Browse MDSupplies brand and vendor partners supplying medical and dental products."
