@@ -15,7 +15,7 @@ export function PartnerCard({ partner }: Props) {
         <div className="flex items-center h-12 flex-1 min-w-0">
           <img
             src={partner.logo.url}
-            alt={partner.logo.altText}
+            alt={partner.logo.altText || partner.name}
             width={partner.logo.width}
             height={partner.logo.height}
             loading="lazy"

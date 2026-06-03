@@ -45,7 +45,7 @@ export function PartnerDetail({ partner }: Props) {
           <div className="flex items-center justify-center bg-white border border-gray-200 rounded-xl p-6 sm:w-48 shrink-0">
             <img
               src={partner.logo.url}
-              alt={partner.logo.altText}
+              alt={partner.logo.altText || partner.name}
               width={partner.logo.width}
               height={partner.logo.height}
               className="max-h-16 w-auto object-contain"

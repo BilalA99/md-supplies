@@ -20,7 +20,7 @@ export function ArticleCard({ article }: Props) {
         <div className="aspect-[16/9] overflow-hidden bg-navy-900">
           <img
             src={article.featuredImage.url}
-            alt={article.featuredImage.altText}
+            alt={article.featuredImage.altText || article.title}
             width={article.featuredImage.width}
             height={article.featuredImage.height}
             loading="lazy"

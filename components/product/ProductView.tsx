@@ -189,14 +189,6 @@ export function ProductView({ product, relatedProducts }: Props) {
                   </span>
                 </>
               )}
-              {stockStatus === 'low_stock' && (
-                <>
-                  <span className="size-[8px] rounded-full shrink-0 bg-amber-400" />
-                  <span className="text-amber-600 text-[13px] font-semibold tracking-[0.26px]">
-                    Low Stock – only {qty} left
-                  </span>
-                </>
-              )}
               {stockStatus === 'backordered' && (
                 <>
                   <span className="size-[8px] rounded-full shrink-0 bg-orange-400" />
