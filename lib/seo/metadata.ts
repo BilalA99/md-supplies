@@ -97,7 +97,7 @@ export function buildMetadata(input: MetadataInput): Metadata {
   const resolvedTitle = resolveTitle(pageType, title, parentSlug)
   const resolvedDescription = description?.trim() || DEFAULT_DESCRIPTION
   const path = resolvePath(pageType, slug, parentSlug)
-  const canonical = buildCanonical({ path, strategy: 'self' })
+  const canonical = input.canonical ?? buildCanonical({ path, strategy: 'self' })
   const robots = buildRobots({ pageType, noIndex, isStaging: STAGING_GUARD })
   const og = buildOg({
     pageType,

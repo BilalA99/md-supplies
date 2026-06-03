@@ -78,7 +78,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
         title,
         description: description || undefined,
         canonical: `${base}/category/${slug}`,
-        noindex: true,
+        noIndex: true,
       })
     }
 

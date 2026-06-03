@@ -188,3 +188,25 @@ describe('buildMetadata — twitter card', () => {
     expect(twitterImages?.[0]).toBe('https://cdn.example.com/p.jpg')
   })
 })
+
+describe('buildMetadata — explicit canonical override', () => {
+  it('uses canonical override instead of slug-derived path', () => {
+    const m = buildMetadata({
+      pageType: 'category',
+      title: 'Exam Gloves',
+      slug: 'exam-gloves',
+      canonical: `${BASE}/category/exam-gloves`,
+    })
+    expect((m.alternates as { canonical?: string })?.canonical).toBe(`${BASE}/category/exam-gloves`)
+  })
+
+  it('override canonical is used even when slug differs', () => {
+    const m = buildMetadata({
+      pageType: 'category',
+      title: 'Gloves',
+      slug: 'other',
+      canonical: `${BASE}/category/gloves`,
+    })
+    expect((m.alternates as { canonical?: string })?.canonical).toBe(`${BASE}/category/gloves`)
+  })
+})
