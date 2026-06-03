@@ -3,7 +3,7 @@ import { buildCanonical, buildRobots } from '@/lib/seo'
 export const metadata = {
   title: 'Returns | MDSupplies',
   description: 'MD Supplies return policy and return request instructions.',
-  robots: buildRobots({ pageType: 'homepage' }),
+  robots: buildRobots({ pageType: 'homepage' }), // non-utility type → index,follow; staging guard applied
   alternates: { canonical: buildCanonical({ path: '/returns' }) },
 }
 

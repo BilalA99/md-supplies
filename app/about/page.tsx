@@ -11,7 +11,7 @@ const IMG_PRODUCTS  = "https://www.figma.com/api/mcp/asset/e2b4a902-bc73-43d5-97
 export const metadata = {
   title: 'About Us | MDSupplies',
   description: 'MDSupplies serves clinics, urgent care centers, HRT practices, and first responders with wholesale pricing, same-day shipping, and trusted brands.',
-  robots: buildRobots({ pageType: 'homepage' }),
+  robots: buildRobots({ pageType: 'homepage' }), // non-utility type → index,follow; staging guard applied
   alternates: { canonical: buildCanonical({ path: '/about' }) },
 }
 

@@ -7,7 +7,7 @@ export const revalidate = 3600
 export const metadata = {
   title: 'Shop by Industry | MDSupplies',
   description: 'Medical supplies curated for your specialty — urgent care, EMS, pharmacy, physical therapy, and more.',
-  robots: buildRobots({ pageType: 'homepage' }),
+  robots: buildRobots({ pageType: 'homepage' }), // non-utility type → index,follow; staging guard applied
   alternates: { canonical: buildCanonical({ path: '/industries' }) },
 }
 

@@ -6,7 +6,7 @@ import { FadeIn } from "@/components/ui/FadeIn";
 export const metadata = {
   title: 'FAQ | MDSupplies',
   description: 'Frequently asked questions about MD Supplies — shipping, returns, product authenticity, and wholesale pricing.',
-  robots: buildRobots({ pageType: 'homepage' }),
+  robots: buildRobots({ pageType: 'homepage' }), // non-utility type → index,follow; staging guard applied
   alternates: { canonical: buildCanonical({ path: '/faq' }) },
 }
 

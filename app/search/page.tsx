@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { buildMetadata } from '@/lib/seo'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
@@ -19,7 +20,14 @@ interface SearchData {
   }
 }
 
-export const metadata = buildMetadata({ pageType: 'utility', title: 'Search', slug: 'search' })
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const sp = await searchParams
+  return buildMetadata({
+    pageType: 'utility',
+    title: sp.q ? `"${sp.q}" — Search` : 'Search',
+    slug: 'search',
+  })
+}
 
 const SUGGESTED = [
   { label: 'Exam Gloves', href: '/category/exam-gloves' },
