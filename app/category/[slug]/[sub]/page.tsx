@@ -13,6 +13,8 @@ import { FilterDrawer } from '@/components/category/FilterDrawer'
 import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { buildMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/routes'
+import { buildCollectionPageSchema, buildBreadcrumbListSchema } from '@/lib/schema'
+import { SITE_URL } from '@/lib/seo/constants'
 import { getSiblingSubcategories } from '@/lib/category-utils'
 
 export const revalidate = 30
@@ -312,10 +314,36 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
         </section>
       )}
 
-      {/* Schema slot — A5 fills this with CollectionPage + BreadcrumbList JSON-LD */}
+      {/* Schema slot — A5: CollectionPage + BreadcrumbList JSON-LD */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify({}) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildCollectionPageSchema({
+              name: collection.title,
+              url: `${SITE_URL}/category/${slug}/${sub}`,
+              ...(collection.description ? { description: collection.description } : {}),
+              ...(collection.image?.url ? { image: collection.image.url } : {}),
+            }),
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbListSchema(
+              [
+                {
+                  label: slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+                  href: `/category/${slug}`,
+                },
+                { label: collection.title },
+              ],
+              `${SITE_URL}/category/${slug}/${sub}`,
+            ),
+          ),
+        }}
       />
     </main>
   )
