@@ -40,7 +40,7 @@ export function ShopByIndustry() {
           whileInView="show"
           viewport={{ once: true }}
         >
-          {INDUSTRIES.map(({ name, slug, image }) => (
+          {INDUSTRIES.slice(0,4).map(({ name, slug, image }) => (
             <motion.div key={slug} variants={itemVariants}>
               <Link
                 href={ROUTES.industry(slug)}

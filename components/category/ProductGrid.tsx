@@ -13,6 +13,8 @@ export function ProductGrid({
   emptyStateHref,
   emptyStateMessage = 'No products found.',
 }: Props) {
+
+    console.log(products)
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">

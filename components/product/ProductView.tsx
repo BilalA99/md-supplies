@@ -104,6 +104,7 @@ export function ProductView({ product, relatedProducts, relatedArticles = [] }: 
     { label: 'Order Size',       value: product.orderSize },
   ].filter((r) => r.value != null)
 
+  console.log(product)
   return (
     <>
       {/* Breadcrumb */}
@@ -111,7 +112,7 @@ export function ProductView({ product, relatedProducts, relatedArticles = [] }: 
         <nav className="flex items-center gap-2 text-[15px] tracking-[0.3px] flex-wrap">
           <Link href="/" className="text-gray-500 hover:text-navy-900 transition-colors">Home</Link>
           <span className="text-gray-500">›</span>
-          <Link href="/shop" className="text-gray-500 hover:text-navy-900 transition-colors">
+          <Link href={`/brands/${product.vendor}`} className="text-gray-500 hover:text-navy-900 transition-colors">
             {product.vendor}
           </Link>
           <span className="text-gray-500">›</span>
@@ -450,18 +451,18 @@ export function ProductView({ product, relatedProducts, relatedArticles = [] }: 
                       </span>
                     </div>
                   </div>
-                  {i < arr.length - 1 && (
-                    <div className="flex items-center justify-center w-[40px] shrink-0">
-                      <span className="text-navy-900 text-[20px] font-semibold">+</span>
-                    </div>
-                  )}
+                  {/*{i < arr.length - 1 && (*/}
+                  {/*  <div className="flex items-center justify-center w-[40px] shrink-0">*/}
+                  {/*    <span className="text-navy-900 text-[20px] font-semibold">+</span>*/}
+                  {/*  </div>*/}
+                  {/*)}*/}
                 </div>
               ))}
             </div>
           </div>
         </section>
       )}
-      <RelatedArticles articles={relatedArticles} heading="From Our Blog" />
+      {/*<RelatedArticles articles={relatedArticles} heading="From Our Blog" />*/}
     </>
   )
 }

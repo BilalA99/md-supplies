@@ -253,6 +253,15 @@ export type Customer = {
 };
 
 export type SlimCollection = {
+  id: string;
   handle: string;
   title: string;
+  description: string;
+  descriptionHtml: string;
+  updatedAt: string;
+  image: ProductImage | null;
+  seo: {
+    title: string | null;
+    description: string | null;
+  };
 };

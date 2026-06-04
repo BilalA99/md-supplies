@@ -31,7 +31,7 @@ export function BlogGrid({ articles }: Props) {
   return (
     <div className="flex flex-col gap-10">
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[22px] gap-y-0"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[22px] gap-y-[28px]"
         variants={containerVariants}
         initial="hidden"
         whileInView="show"
@@ -48,6 +48,7 @@ export function BlogGrid({ articles }: Props) {
               })}
               title={article.title}
               excerpt={article.excerpt ?? ""}
+              image={article.image}
             />
           </motion.div>
         ))}

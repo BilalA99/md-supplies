@@ -73,7 +73,6 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     if (!data.collection) return { title: 'Category | MD Supplies' }
     const { title, description } = data.collection
 
-    // Rule 3: filtered or sorted → noindex, canonical to clean base
     if (isFiltered) {
       return buildMetadata({
         pageType: 'category',
@@ -84,7 +83,6 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       })
     }
 
-    // Rule 2: paginated → index, canonical to self (with page + cursor)
     if (currentPage > 1) {
       return buildMetadata({
         pageType: 'category',
@@ -96,7 +94,6 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       })
     }
 
-    // Rule 1: clean page 1 → index, canonical computed from slug
     return buildMetadata({
       pageType: 'category',
       title,
@@ -157,46 +154,79 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   return (
     <main className="bg-[#f9fafc] min-h-screen">
       {/* Breadcrumb */}
-      <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-5">
+      <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-4">
         <Breadcrumb items={[{ label: collection.title }]} />
       </div>
 
-      {/* Hero — with image */}
-      {collection.image && (
-        <div className="relative bg-navy-900 overflow-hidden h-[220px] sm:h-[280px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={collection.image.url}
-            alt={collection.image.altText ?? collection.title}
-            className="absolute inset-0 w-full h-full object-cover opacity-30"
-          />
-          <div className="relative max-w-360 mx-auto px-4 sm:px-8 lg:px-14 h-full flex flex-col justify-center">
-            <h1 className="text-white text-[28px] sm:text-[36px] font-bold leading-tight">
+      {/* ── Hero — new split layout ── */}
+      <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pb-8">
+        <div className="relative bg-white overflow-hidden min-h-[320px] sm:min-h-[380px] flex">
+          {/* Left card: text content */}
+          <div className="relative z-10 flex flex-col justify-center px-8 sm:px-12 py-10 max-w-[560px]">
+            {/* Badge */}
+            <div className="inline-flex self-start items-center bg-[rgba(0,193,255,0.2)] rounded-full px-4 py-1.5 mb-5">
+              <span className="text-[#0086b1] text-[13px] font-semibold tracking-[0.3px]">
+                CERTIFIED MEDICAL SUPPLIER
+              </span>
+            </div>
+
+            <h1 className="text-navy-900 text-[40px] sm:text-[50px] font-semibold leading-[1.2] tracking-[-0.01em] mb-4">
               {collection.title}
             </h1>
+
             {collection.description && (
-              <p className="text-white/70 text-[15px] mt-2 max-w-2xl">
+              <p className="text-gray-500 text-[15px] leading-[1.75] max-w-[500px] mb-8">
                 {collection.description}
               </p>
             )}
+
+            <Link
+              href={ROUTES.category(slug)}
+              className="self-start border border-navy-900 text-navy-900 text-[14px] font-semibold px-6 h-[52px] flex items-center hover:bg-navy-900 hover:text-white transition-colors"
+            >
+              View All {collection.title}
+            </Link>
+          </div>
+
+          {/* Right: collection image */}
+          {collection.image && (
+            <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[55%]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={collection.image.url}
+                alt={collection.image.altText ?? collection.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Subcategory tabs ── */}
+      {subcategories.length > 0 && (
+        <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 mb-6">
+          <div className="flex flex-wrap gap-2 items-center">
+            {subcategories.map((sub) => (
+              <Link
+                key={sub.slug}
+                href={ROUTES.subcategory(slug, sub.slug)}
+                className="border border-[rgba(102,102,100,0.2)] bg-white text-navy-900 text-[13px] font-semibold px-4 h-[52px] flex items-center hover:border-navy-900 transition-colors whitespace-nowrap"
+              >
+                {sub.label}
+              </Link>
+            ))}
+            <Link
+              href={ROUTES.category(slug)}
+              className="bg-navy-900 text-white text-[13px] font-semibold px-4 h-[52px] flex items-center hover:bg-navy-800 transition-colors whitespace-nowrap"
+            >
+              All
+            </Link>
           </div>
         </div>
       )}
 
-      {/* Hero — no image fallback */}
-      {!collection.image && (
-        <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pb-4">
-          <h1 className="text-navy-900 text-[26px] font-bold">{collection.title}</h1>
-          {collection.description && (
-            <p className="text-gray-500 text-[15px] mt-1 max-w-2xl">
-              {collection.description}
-            </p>
-          )}
-        </div>
-      )}
-
       {/* Main layout */}
-      <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-8 flex gap-0 items-start">
+      <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-6 flex gap-0 items-start">
         {/* Desktop filter sidebar */}
         <aside className="hidden lg:block w-[280px] shrink-0 pr-10 sticky top-[140px]">
           <CategoryFilters
@@ -209,7 +239,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         {/* Product area */}
         <div className="flex-1 min-w-0">
           {/* Sort bar */}
-          <div className="flex justify-end mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-gray-500 text-[15px]">
+              Showing {products.length} of {collection.products.filters?.[0] ? '' : ''} products
+            </p>
             <CategorySort currentSort={sp.sort} activeFilters={activeFilterStrings} />
           </div>
 
@@ -246,7 +279,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             emptyStateHref={ROUTES.category(slug)}
           />
 
-          {/* Clean-page pagination (real anchor links, SEO-indexable) */}
+          {/* Clean-page pagination */}
           {!isFiltered && (
             <CategoryPagination
               currentPage={currentPage}
@@ -256,7 +289,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             />
           )}
 
-          {/* Filtered/sorted pages: cursor-based Load More (noindex, not paginated) */}
+          {/* Filtered/sorted pages: Load More */}
           {isFiltered && pageInfo.hasNextPage && (
             <div className="flex items-center justify-center pt-12">
               <Link
@@ -271,29 +304,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      {/* Subcategory grid — derived from Shopify collection handles (${slug}-* pattern) */}
-      {subcategories.length > 0 && (
-        <section className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-10 border-t border-gray-200">
-          <h2 className="text-navy-900 text-[20px] font-semibold mb-6">
-            Browse by Subcategory
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {subcategories.map((sub) => (
-              <Link
-                key={sub.slug}
-                href={ROUTES.subcategory(slug, sub.slug)}
-                className="border border-gray-200 bg-white text-navy-900 text-[14px] font-medium px-4 py-3 text-center hover:border-navy-900 transition-colors"
-              >
-                {sub.label}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Related categories — other collections from Shopify */}
+      {/* Related categories */}
       {relatedCategories.length > 0 && (
-        <section className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-8">
+        <section className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-8 border-t border-gray-200">
           <h2 className="text-navy-900 text-[18px] font-semibold mb-4">
             Related Categories
           </h2>
@@ -311,15 +324,16 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </section>
       )}
 
-      {/* Bottom SEO copy */}
+      {/* ── About section — dark navy background ── */}
       {collection.descriptionHtml && (
-        <section className="bg-white border-t border-gray-200 py-14">
-          <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14">
-            <h2 className="text-navy-900 text-[22px] font-semibold tracking-[0.44px] mb-6">
+        <section className="bg-navy-900 py-16 sm:py-20">
+          <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 text-center">
+            <h2 className="text-white text-[36px] sm:text-[50px] font-semibold leading-[1.2] tracking-[-0.01em] mb-8">
               About {collection.title}
             </h2>
             <div
-              className="prose prose-gray max-w-3xl text-[15px] leading-[28px] text-gray-500"
+              className="prose prose-invert max-w-[880px] mx-auto text-[15px] leading-[1.85] text-white/75
+                prose-headings:text-white prose-a:text-[#0086b1] prose-strong:text-white"
               dangerouslySetInnerHTML={{ __html: collection.descriptionHtml }}
             />
           </div>

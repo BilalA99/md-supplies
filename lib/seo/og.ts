@@ -6,9 +6,8 @@ import {
 } from './constants'
 import type { PageType } from './types'
 
-function ogType(pageType: PageType): 'website' | 'article' | 'product' {
+function ogType(pageType: PageType): 'website' | 'article' {
   if (pageType === 'blog-article') return 'article'
-  if (pageType === 'product') return 'product'
   return 'website'
 }
 
