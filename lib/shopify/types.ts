@@ -227,6 +227,7 @@ export type BlogArticleSummary = {
   publishedAt: string;
   author: { name: string };
   image: ProductImage | null;
+  tags: string[];
 };
 
 export type BlogArticle = BlogArticleSummary & {
@@ -249,4 +250,18 @@ export type Customer = {
   defaultAddress: Address | null;
   addresses?: { nodes: Address[] };
   orders?: { nodes: Order[]; pageInfo: PageInfo };
+};
+
+export type SlimCollection = {
+  id: string;
+  handle: string;
+  title: string;
+  description: string;
+  descriptionHtml: string;
+  updatedAt: string;
+  image: ProductImage | null;
+  seo: {
+    title: string | null;
+    description: string | null;
+  };
 };

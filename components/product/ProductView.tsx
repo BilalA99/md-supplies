@@ -8,6 +8,8 @@ import {
 import type { Product, CollectionProduct, ProductVariant } from '@/lib/shopify/types'
 import { VariantSelector } from './VariantSelector'
 import { AddToCartButton } from './AddToCartButton'
+import { RelatedArticles } from '@/components/blog/RelatedArticles'
+import type { BlogArticleSummary } from '@/lib/shopify/types'
 
 type Tab = 'DESCRIPTION' | 'SPECIFICATIONS' | 'ORDERING INFO' | 'REVIEWS'
 const TABS: Tab[] = ['DESCRIPTION', 'SPECIFICATIONS', 'ORDERING INFO', 'REVIEWS']
@@ -106,6 +108,7 @@ export function ProductView({ product, relatedProducts, breadcrumbs }: Props) {
     { label: 'Order Size',       value: product.orderSize },
   ].filter((r) => r.value != null)
 
+  console.log(product)
   return (
     <>
       {/* Breadcrumb */}
@@ -452,17 +455,18 @@ export function ProductView({ product, relatedProducts, breadcrumbs }: Props) {
                       </span>
                     </div>
                   </div>
-                  {i < arr.length - 1 && (
-                    <div className="flex items-center justify-center w-[40px] shrink-0">
-                      <span className="text-navy-900 text-[20px] font-semibold">+</span>
-                    </div>
-                  )}
+                  {/*{i < arr.length - 1 && (*/}
+                  {/*  <div className="flex items-center justify-center w-[40px] shrink-0">*/}
+                  {/*    <span className="text-navy-900 text-[20px] font-semibold">+</span>*/}
+                  {/*  </div>*/}
+                  {/*)}*/}
                 </div>
               ))}
             </div>
           </div>
         </section>
       )}
+      {/*<RelatedArticles articles={relatedArticles} heading="From Our Blog" />*/}
     </>
   )
 }

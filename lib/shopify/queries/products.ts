@@ -46,6 +46,7 @@ export const GET_PRODUCT = `#graphql
           id
           title
           availableForSale
+          
           selectedOptions { name value }
           price { amount currencyCode }
           compareAtPrice { amount currencyCode }
@@ -56,6 +57,7 @@ export const GET_PRODUCT = `#graphql
         name
         values
       }
+     
     }
   }
 `;
@@ -65,6 +67,33 @@ export const GET_PRODUCTS = `#graphql
   query GetProducts($first: Int!, $sortKey: ProductSortKeys, $reverse: Boolean) {
     products(first: $first, sortKey: $sortKey, reverse: $reverse) {
       nodes { ...ProductCard }
+    }
+  }
+`;
+
+export const GET_PRODUCTS_BY_VENDOR = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query GetProductsByVendor(
+    $query: String!
+    $first: Int!
+    $after: String
+    $sortKey: ProductSortKeys
+    $reverse: Boolean
+  ) {
+    products(
+      first: $first
+      after: $after
+      sortKey: $sortKey
+      reverse: $reverse
+      query: $query
+    ) {
+      nodes { ...ProductCard }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
     }
   }
 `;

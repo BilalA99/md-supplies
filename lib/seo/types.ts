@@ -27,6 +27,8 @@ export interface MetadataInput {
   image?: string
   /** Explicitly force noindex regardless of page type. */
   noIndex?: boolean
+  /** Explicit canonical URL override — bypasses the slug-derived canonical. */
+  canonical?: string
 }
 
 export type CanonicalStrategy = 'self' | 'parent-unfiltered' | 'base-product'

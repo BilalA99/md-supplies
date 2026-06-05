@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { ROUTES } from '@/lib/routes';
 
 interface CollectionSummary {
   id: string;
@@ -35,7 +36,7 @@ export function PopularCategories({ collections }: Props) {
             Popular Categories
           </h2>
           <Link
-            href="/shop"
+            href={ROUTES.categories}
             className="text-[15px] font-semibold text-gray-500 hover:text-navy-900 transition-colors whitespace-nowrap"
           >
             Browse all categories →
@@ -52,7 +53,7 @@ export function PopularCategories({ collections }: Props) {
           {collections.map(({ id, title, handle, image }) => (
             <motion.div key={id} variants={itemVariants}>
               <Link
-                href={`/category/${handle}`}
+                href={ROUTES.category(handle)}
                 className="group bg-white hover:bg-neutral-50 transition-colors flex flex-col items-center justify-center gap-4 py-10 px-4 h-full"
               >
                 <div className="w-14 h-14 flex items-center justify-center overflow-hidden">
