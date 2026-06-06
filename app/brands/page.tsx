@@ -5,6 +5,7 @@ import { GET_PRODUCTS } from '@/lib/shopify/queries/products'
 import { slugifyVendor } from '@/lib/brands'
 import type { CollectionProduct } from '@/lib/shopify/types'
 import { BrandDirectory } from './BrandDirectory'
+import Image from 'next/image'
 
 export const revalidate = 3600
 
@@ -19,14 +20,17 @@ const PROTOCOL_ITEMS = [
   {
     title: 'FDA Compliant',
     description: 'Every product we carry meets FDA compliance standards — so you can procure with confidence.',
+    src: '/icons/protocol-1.svg'
   },
   {
     title: 'ISO Certified',
     description: 'We stock only industry-leading clinical brands with full ISO certifications.',
+    src: '/icons/protocol-2.svg'
   },
   {
     title: 'Dedicated Support',
     description: 'Expert account managers for every facility to handle complex procurement needs.',
+    src: '/icons/protocol-3.svg'
   },
 ]
 
@@ -49,21 +53,38 @@ export default async function BrandsPage() {
     <main className="bg-neutral-100">
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-neutral-100 min-h-[520px] lg:min-h-[580px]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-[49px] py-14 lg:py-0 lg:h-[716px] flex flex-col lg:flex-row items-center">
+      <section className="relative overflow-hidden bg-neutral-100">
 
-          {/* Left content */}
-          <div className="flex-1 max-w-[55vw] flex flex-col justify-center items-start py-20 pl-16 z-10 gap-6 lg:bg-white">
-            <h1 className="text-navy-900 text-[40px] lg:text-[50px] font-semibold leading-[1.2] tracking-tight max-w-[755px]">
+        {/* Mobile layout: text → image stacked */}
+        <div className="lg:hidden px-4 sm:px-8 pt-8 pb-0">
+          <span className="text-teal-500 text-[12px] font-semibold tracking-[0.24px] uppercase mb-3 block">
+            Shop by Brand
+          </span>
+          <h1 className="text-navy-900 text-[32px] font-semibold leading-[1.2] tracking-tight mb-3">
+            Clinical Standards<br />from Global Leaders
+          </h1>
+          <p className="text-gray-500 text-[16px] leading-[26px] mb-6">
+            Whether you run an urgent care clinic, HRT practice, or home health agency — we stock the products you need with same-day shipping and wholesale pricing.
+          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={HERO_IMAGE}
+            alt="Medical supplies"
+            className="w-full aspect-[4/3] object-cover"
+          />
+        </div>
+
+        {/* Desktop layout: text left, image right (absolute) */}
+        <div className="hidden lg:flex max-w-[1440px] mx-auto px-[49px] h-[716px] flex-row items-center relative">
+          <div className="flex-1 max-w-[55%] flex flex-col justify-center items-start py-20 pl-16 z-10 gap-6 bg-white h-full">
+            <h1 className="text-navy-900 text-[50px] font-semibold leading-[1.2] tracking-tight max-w-[755px]">
               Clinical Standards<br />from Global Leaders
             </h1>
             <p className="text-gray-500 text-[18px] leading-[30px] max-w-[541px]">
               Whether you run an urgent care clinic, HRT practice, or home health agency — we stock the products you need with same-day shipping and wholesale pricing.
             </p>
           </div>
-
-          {/* Right hero image */}
-          <div className="hidden lg:block absolute right-0 top-0 w-[758px] h-[728px]">
+          <div className="absolute right-0 top-0 w-[758px] h-[728px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={HERO_IMAGE}
@@ -72,6 +93,7 @@ export default async function BrandsPage() {
             />
           </div>
         </div>
+
       </section>
 
       {/* ── Brand Directory ── */}
@@ -94,10 +116,9 @@ export default async function BrandsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 lg:gap-0 relative">
             {PROTOCOL_ITEMS.map((item, i) => (
               <div key={item.title} className="flex flex-col items-center text-center px-4 lg:px-12 relative">
-                {i < PROTOCOL_ITEMS.length - 1 && (
-                  <div className="hidden sm:block absolute right-0 top-0 h-full w-px bg-white/20" />
-                )}
-                <div className="bg-[rgba(0,193,255,0.2)] rounded-[12px] w-[50px] h-[50px] mb-6" />
+                <div className="bg-[rgba(0,193,255,0.2)] rounded-[12px] w-[50px] h-[50px] mb-6 flex items-center justify-center">
+                  <Image src={item.src} alt='icon' width={100} height={100} className='size-6'/>
+                </div>
                 <span className="text-white text-[16px] font-bold tracking-[0.32px] mb-3">
                   {item.title}
                 </span>
