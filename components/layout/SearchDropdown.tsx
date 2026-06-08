@@ -123,7 +123,7 @@ export function SearchDropdown({ onClose }: Props) {
         <div className="max-w-360 mx-auto px-4 md:px-8 py-5">
           {/* Input row */}
           <form onSubmit={handleSubmit} className="flex gap-2 relative">
-            <div className="flex-1 flex items-center border-2 border-navy-900 px-4 gap-3 bg-white transition-colors">
+            <div className="flex-1 flex items-center border-2 border-navy-900 px-4 gap-3 bg-white">
               <Search
                 size={17}
                 className={`shrink-0 transition-colors ${loading ? 'text-teal-500 animate-pulse' : 'text-gray-400'}`}
@@ -138,30 +138,28 @@ export function SearchDropdown({ onClose }: Props) {
                 autoComplete="off"
                 className="flex-1 h-[46px] text-[15px] text-navy-900 placeholder:text-gray-400 outline-none bg-transparent"
               />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => { setQuery(''); setResults(EMPTY); inputRef.current?.focus() }}
-                  className="text-gray-400 hover:text-navy-900 transition-colors shrink-0 p-1"
-                  aria-label="Clear"
-                >
-                  <X size={14} />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (query) {
+                    setQuery('')
+                    setResults(EMPTY)
+                    inputRef.current?.focus()
+                  } else {
+                    onClose()
+                  }
+                }}
+                className="text-gray-400 hover:text-navy-900 transition-colors shrink-0 p-1 focus:outline-none"
+                aria-label={query ? 'Clear' : 'Close search'}
+              >
+                <X size={14} />
+              </button>
             </div>
             <button
               type="submit"
-              className="bg-navy-900 text-white h-[46px] px-7 text-[13px] font-bold tracking-[0.5px] uppercase hover:bg-navy-950 transition-colors shrink-0"
+              className="bg-navy-900 text-white h-[46px] px-7 text-[13px] font-bold tracking-[0.5px] uppercase hover:bg-navy-950 transition-colors shrink-0 focus:outline-none"
             >
               Search
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-gray-400 hover:text-navy-900 transition-colors px-2"
-              aria-label="Close search"
-            >
-              <X size={18} />
             </button>
           </form>
 
@@ -185,7 +183,7 @@ export function SearchDropdown({ onClose }: Props) {
                         key={q.text}
                         type="button"
                         onClick={() => navigate(`/search?q=${encodeURIComponent(q.text)}`)}
-                        className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${isActive ? 'bg-neutral-50' : 'hover:bg-neutral-50'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors focus:outline-none ${isActive ? 'bg-neutral-50' : 'hover:bg-neutral-50'}`}
                       >
                         <Search size={13} className="text-gray-300 shrink-0" />
                         <span
@@ -212,7 +210,7 @@ export function SearchDropdown({ onClose }: Props) {
                         key={p.id}
                         type="button"
                         onClick={() => navigate(`/product/${p.handle}`)}
-                        className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${isActive ? 'bg-neutral-50' : 'hover:bg-neutral-50'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors focus:outline-none ${isActive ? 'bg-neutral-50' : 'hover:bg-neutral-50'}`}
                       >
                         <div className="w-9 h-9 shrink-0 border border-gray-100 bg-gray-50 overflow-hidden flex items-center justify-center">
                           {p.featuredImage ? (
@@ -250,7 +248,7 @@ export function SearchDropdown({ onClose }: Props) {
                         key={c.id}
                         type="button"
                         onClick={() => navigate(`/category/${c.handle}`)}
-                        className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${isActive ? 'bg-neutral-50' : 'hover:bg-neutral-50'}`}
+                        className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors focus:outline-none ${isActive ? 'bg-neutral-50' : 'hover:bg-neutral-50'}`}
                       >
                         <Tag size={13} className="text-gray-300 shrink-0" />
                         <span className="text-[13px] text-navy-900 flex-1">{c.title}</span>
@@ -266,7 +264,7 @@ export function SearchDropdown({ onClose }: Props) {
                 <button
                   type="button"
                   onClick={() => navigate(`/search?q=${encodeURIComponent(query)}`)}
-                  className="text-[12px] font-semibold text-teal-500 hover:text-teal-600 transition-colors flex items-center gap-1"
+                  className="text-[12px] font-semibold text-teal-500 hover:text-teal-600 transition-colors flex items-center gap-1 focus:outline-none"
                 >
                   See all results for &ldquo;{query}&rdquo;
                   <ArrowRight size={12} />
