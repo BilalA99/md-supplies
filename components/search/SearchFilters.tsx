@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import type { CollectionFilter } from '@/lib/shopify/types'
@@ -9,6 +9,7 @@ interface Props {
   filters: CollectionFilter[]
   activeFilters: string[]
   currentSort?: string
+  q: string
 }
 
 function Checkbox({ checked, onChange }: { checked: boolean; onChange: () => void }) {
@@ -52,10 +53,7 @@ function FilterGroup({
         <p className="text-navy-900 text-[18px] font-semibold tracking-[0.36px] uppercase">
           {filter.label}
         </p>
-        <ChevronDown
-          size={16}
-          className={`text-navy-900 transition-transform ${open ? 'rotate-180' : ''}`}
-        />
+        <ChevronDown size={16} className={`text-navy-900 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       <div className="h-px bg-gray-200 mb-5" />
       {open && (
@@ -66,12 +64,8 @@ function FilterGroup({
                 checked={activeFilters.includes(value.input)}
                 onChange={() => onToggle(value.input)}
               />
-              <span className="flex-1 text-navy-900 text-[15px] tracking-[0.3px]">
-                {value.label}
-              </span>
-              <span className="text-gray-500 text-[15px] tracking-[0.3px]">
-                {value.count}
-              </span>
+              <span className="flex-1 text-navy-900 text-[15px] tracking-[0.3px]">{value.label}</span>
+              <span className="text-gray-500 text-[15px] tracking-[0.3px]">{value.count}</span>
             </label>
           ))}
         </div>
@@ -104,16 +98,10 @@ function PriceRangeFilter({
 
   const pct = Math.round((value / MAX_PRICE) * 100)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(Number(e.target.value))
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setValue(Number(e.target.value))
 
   const handleCommit = () => {
-    if (value >= MAX_PRICE) {
-      onSetPrice('')
-    } else {
-      onSetPrice(JSON.stringify({ price: { min: 0, max: value } }))
-    }
+    onSetPrice(value >= MAX_PRICE ? '' : JSON.stringify({ price: { min: 0, max: value } }))
   }
 
   const displayMax =
@@ -128,26 +116,15 @@ function PriceRangeFilter({
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between mb-3"
       >
-        <p className="text-navy-900 text-[18px] font-semibold tracking-[0.36px] uppercase">
-          Price Range
-        </p>
-        <ChevronDown
-          size={16}
-          className={`text-navy-900 transition-transform ${open ? 'rotate-180' : ''}`}
-        />
+        <p className="text-navy-900 text-[18px] font-semibold tracking-[0.36px] uppercase">Price Range</p>
+        <ChevronDown size={16} className={`text-navy-900 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       <div className="h-px bg-gray-200 mb-5" />
       {open && (
         <div>
           <input
-            type="range"
-            min={0}
-            max={MAX_PRICE}
-            step={500}
-            value={value}
-            onChange={handleChange}
-            onMouseUp={handleCommit}
-            onTouchEnd={handleCommit}
+            type="range" min={0} max={MAX_PRICE} step={500} value={value}
+            onChange={handleChange} onMouseUp={handleCommit} onTouchEnd={handleCommit}
             className="price-slider w-full"
             style={{ '--slider-pct': `${pct}%` } as React.CSSProperties}
             aria-label="Maximum price"
@@ -162,16 +139,16 @@ function PriceRangeFilter({
   )
 }
 
-export function CategoryFilters({ filters, activeFilters, currentSort }: Props) {
+export function SearchFilters({ filters, activeFilters, currentSort, q }: Props) {
   const router = useRouter()
-  const pathname = usePathname()
 
   const buildUrl = (nextFilters: string[]) => {
     const params = new URLSearchParams()
+    if (q) params.set('q', q)
     if (currentSort) params.set('sort', currentSort)
     nextFilters.forEach((f) => params.append('filter', f))
     const qs = params.toString()
-    return qs ? `${pathname}?${qs}` : pathname
+    return qs ? `/search?${qs}` : '/search'
   }
 
   const toggleFilter = (input: string) => {
@@ -191,11 +168,9 @@ export function CategoryFilters({ filters, activeFilters, currentSort }: Props) 
 
   const clearAll = () => router.push(buildUrl([]))
 
-  const hasActive = activeFilters.length > 0
-
   return (
     <div className="flex flex-col">
-      {hasActive && (
+      {activeFilters.length > 0 && (
         <button
           type="button"
           onClick={clearAll}
@@ -206,22 +181,9 @@ export function CategoryFilters({ filters, activeFilters, currentSort }: Props) 
       )}
       {filters.map((f) => {
         if (f.type === 'PRICE_RANGE') {
-          return (
-            <PriceRangeFilter
-              key={f.id}
-              activeFilters={activeFilters}
-              onSetPrice={setPriceFilter}
-            />
-          )
+          return <PriceRangeFilter key={f.id} activeFilters={activeFilters} onSetPrice={setPriceFilter} />
         }
-        return (
-          <FilterGroup
-            key={f.id}
-            filter={f}
-            activeFilters={activeFilters}
-            onToggle={toggleFilter}
-          />
-        )
+        return <FilterGroup key={f.id} filter={f} activeFilters={activeFilters} onToggle={toggleFilter} />
       })}
     </div>
   )
