@@ -60,6 +60,7 @@ export function QuickAddModal({ product, onClose }: Props) {
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       aria-hidden="false"
+      onClick={(e) => e.stopPropagation()}
     >
       {/* Overlay */}
       <div

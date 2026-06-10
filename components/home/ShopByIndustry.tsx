@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { FadeIn } from '@/components/ui/FadeIn'
+import { AnimatedArrow } from '@/components/ui/AnimatedArrow'
 import { INDUSTRIES } from '@/lib/industries'
 import { ROUTES } from '@/lib/routes'
 
@@ -27,9 +28,9 @@ export function ShopByIndustry() {
           </h2>
           <Link
             href={ROUTES.industries}
-            className="text-[15px] font-semibold text-gray-500 hover:text-navy-900 transition-colors whitespace-nowrap"
+            className="group text-[15px] font-semibold text-gray-500 hover:text-navy-900 transition-colors whitespace-nowrap inline-flex items-center gap-1"
           >
-            All Industries →
+            All Industries <AnimatedArrow size={14} />
           </Link>
         </FadeIn>
 
@@ -52,8 +53,8 @@ export function ShopByIndustry() {
                   alt={name}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/65" />
-                <span className="absolute bottom-5 left-5 text-white text-[20px] font-semibold tracking-[0.4px] drop-shadow-sm">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/65 transition-opacity duration-300 group-hover:opacity-0" />
+                <span className="absolute bottom-5 left-5 text-white text-[20px] font-semibold tracking-[0.4px] drop-shadow-md">
                   {name}
                 </span>
               </Link>

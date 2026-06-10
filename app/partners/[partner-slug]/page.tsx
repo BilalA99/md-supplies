@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Package, Tag } from 'lucide-react'
+import { ArrowLeft, Package, Tag } from 'lucide-react'
+import { AnimatedArrow } from '@/components/ui/AnimatedArrow'
 import { buildMetadata } from '@/lib/seo'
 import { getPartnerBySlug, mockPartners } from '@/lib/mock/partners'
 import { FeaturedProductCard } from '@/components/b2b/FeaturedProductCard'
@@ -191,9 +192,9 @@ export default async function PartnerDetailPage({ params }: Props) {
                     </p>
                     <Link
                       href={`/brands/${partner.slug}`}
-                      className="text-teal-500 text-[14px] font-semibold hover:underline flex items-center gap-1"
+                      className="group text-teal-500 text-[14px] font-semibold flex items-center gap-1"
                     >
-                      View all <ArrowRight size={14} />
+                      View all <AnimatedArrow size={14} />
                     </Link>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -251,9 +252,9 @@ export default async function PartnerDetailPage({ params }: Props) {
                 </p>
                 <Link
                   href="/contact"
-                  className="text-teal-500 text-[14px] font-semibold hover:underline inline-flex items-center gap-1"
+                  className="group text-teal-500 text-[14px] font-semibold inline-flex items-center gap-1"
                 >
-                  Contact us <ArrowRight size={13} />
+                  Contact us <AnimatedArrow size={13} />
                 </Link>
               </div>
             </FadeIn>

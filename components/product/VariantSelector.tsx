@@ -36,8 +36,8 @@ export function VariantSelector({ options, variants, selectedVariant, onSelect }
     <div className="flex flex-col gap-5">
       {options.map((option) => (
         <div key={option.id} className="flex flex-col gap-3">
-          <p className="text-navy-900 text-[13px] font-semibold tracking-[0.26px] uppercase">
-            {option.name}
+          <p className="text-navy-900 text-[15px] font-semibold tracking-[0.3px] uppercase">
+            SELECT {option.name}
           </p>
           <div className="flex gap-3 flex-wrap">
             {option.values.map((value) => {
@@ -64,13 +64,18 @@ export function VariantSelector({ options, variants, selectedVariant, onSelect }
                   key={value}
                   onClick={() => handleChange(option.name, value)}
                   disabled={!available}
-                  className={`px-4 h-[40px] text-[14px] font-semibold tracking-[0.28px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`flex flex-col items-start justify-center px-4 h-[77px] min-w-[167px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                     isSelected
                       ? 'bg-navy-900 text-white'
                       : 'border border-[rgba(102,102,100,0.5)] text-navy-900 hover:border-navy-900'
                   }`}
                 >
-                  {value}
+                  <span className="text-[14px] font-semibold tracking-[0.28px]">{value}</span>
+                  {variantForValue && (
+                    <span className={`text-[13px] mt-0.5 tracking-[0.26px] ${isSelected ? 'text-white/70' : 'text-gray-500'}`}>
+                      ${parseFloat(variantForValue.price.amount).toFixed(2)}
+                    </span>
+                  )}
                 </button>
               )
             })}

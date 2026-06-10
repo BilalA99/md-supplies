@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { AnimatedArrow } from "@/components/ui/AnimatedArrow";
 import type { CollectionProduct } from "@/lib/shopify/types";
 import { Van } from "lucide-react";
 
@@ -93,7 +94,7 @@ export function HeroSection({ products }: Props) {
               <div className="flex flex-wrap items-center gap-4">
                 <Link
                   href="/products"
-                  className="bg-navy-900 text-white text-[18px] font-semibold px-[52px] py-[17px] hover:bg-navy-950 transition-colors tracking-[0.36px]"
+                  className="bg-navy-900 text-white border border-navy-900 text-[18px] font-semibold px-[52px] py-[17px] hover:bg-white hover:text-navy-900 hover:border-teal-500 transition-colors tracking-[0.36px]"
                 >
                   Shop All Products
                 </Link>
@@ -120,9 +121,9 @@ export function HeroSection({ products }: Props) {
                 </div>
                 <Link
                   href="/occ"
-                  className="text-teal-500 text-[15px] font-semibold hover:underline shrink-0 tracking-[0.3px]"
+                  className="group text-teal-500 text-[15px] font-semibold shrink-0 tracking-[0.3px] inline-flex items-center gap-1"
                 >
-                  Shop OCC →
+                  Shop OCC <AnimatedArrow size={14} />
                 </Link>
               </div>
             </FadeIn>

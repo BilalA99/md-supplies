@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ShoppingCart } from 'lucide-react'
 import type { CollectionProduct } from '@/lib/shopify/types'
+import { ShopifyQuickAddButton } from './ShopifyQuickAddButton'
 
 export function ShopifyProductCard({ product, categorySlug }: { product: CollectionProduct; categorySlug?: string }) {
   const variant = product.variants.nodes[0]
@@ -51,15 +52,8 @@ export function ShopifyProductCard({ product, categorySlug }: { product: Collect
           <div className="absolute inset-0 bg-white/60" />
         )}
 
-        {/* Add to cart hover overlay */}
-        {product.availableForSale && (
-          <div className="absolute inset-x-0 bottom-0 h-[43px] bg-navy-900 flex items-center justify-center gap-2 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-            <ShoppingCart size={14} className="text-white" />
-            <span className="text-white text-[12px] font-medium tracking-[0.24px]">
-              Add to cart
-            </span>
-          </div>
-        )}
+        {/* Quick add button */}
+        <ShopifyQuickAddButton product={product} />
       </div>
 
       {/* Info */}

@@ -47,7 +47,7 @@ export function QuickAddContent({ product, titleId }: Props) {
           <h2 id={titleId} className="text-sm font-semibold text-navy-900 leading-snug line-clamp-2">
             {product.title}
           </h2>
-          <p className="text-xs text-gray-500">SKU: {product.sku}</p>
+          {product.sku && <p className="text-xs text-gray-500">SKU: {product.sku}</p>}
           <p className="text-sm font-bold text-navy-900">{formatCents(displayPrice)}</p>
         </div>
       </div>

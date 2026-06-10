@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { ROUTES } from '@/lib/routes';
+import {AnimatedArrow} from "@/components/ui/AnimatedArrow";
 
 const CATEGORIES = [
   { title: 'Needles & Syringes', handle: 'needles-syringes',   icon: '/icons/category-logo-1.svg' },
@@ -36,10 +37,10 @@ export function PopularCategories() {
             Popular Categories
           </h2>
           <Link
-            href={ROUTES.categories}
-            className="text-[15px] font-semibold text-gray-500 hover:text-navy-900 transition-colors whitespace-nowrap"
+              href={ROUTES.categories}
+              className="group text-[15px] font-semibold text-gray-500 hover:text-navy-900 transition-colors whitespace-nowrap inline-flex items-center gap-1"
           >
-            Browse all categories →
+            Browse all categories <AnimatedArrow size={14} />
           </Link>
         </FadeIn>
 

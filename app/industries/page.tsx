@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { INDUSTRIES } from '@/lib/industries'
 import { buildCanonical, buildRobots } from '@/lib/seo'
 import {BadgeCheck, FileText, Headset, MapPin, Truck} from "lucide-react";
+import { AnimatedArrow } from '@/components/ui/AnimatedArrow'
 
 export const revalidate = 3600
 
@@ -63,7 +64,7 @@ export default function IndustriesPage() {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
                 href="/categories"
-                className="bg-navy-900 text-white text-[18px] font-semibold px-8 h-[59px] flex items-center justify-center hover:bg-navy-950 transition-colors"
+                className="bg-navy-900 text-white border border-navy-900 text-[18px] font-semibold px-8 h-[59px] flex items-center justify-center hover:bg-white hover:text-navy-900 hover:border-teal-500 transition-colors"
               >
                 Shop All Products
               </Link>
@@ -81,8 +82,8 @@ export default function IndustriesPage() {
                 <span className="text-navy-900 text-[18px] font-extrabold tracking-[0.36px]">OCC Program</span>
                 <span className="text-navy-900 text-[16px] font-semibold tracking-[0.32px]">Free shipping on all eligible items</span>
               </div>
-              <Link href="/solutions/occ" className="ml-auto text-teal-500 text-[15px] font-semibold whitespace-nowrap hover:underline">
-                Shop OCC →
+              <Link href="/solutions/occ" className="group ml-auto text-teal-500 text-[15px] font-semibold whitespace-nowrap inline-flex items-center gap-1">
+                Shop OCC <AnimatedArrow size={14} />
               </Link>
             </div>
           </div>
@@ -119,7 +120,7 @@ export default function IndustriesPage() {
           <h2 className="text-navy-900 text-[28px] font-semibold tracking-[0.56px] mb-10">
             Industries We Serve
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {INDUSTRIES.map(({ name, slug, image, description }) => (
               <Link
                 key={slug}
@@ -141,8 +142,8 @@ export default function IndustriesPage() {
                   <p className="text-gray-500 text-[15px] leading-[22px] tracking-[0.3px]">
                     {description}
                   </p>
-                  <span className="text-teal-500 text-[14px] font-medium tracking-[0.7px] mt-1 group-hover:underline">
-                    Shop Industry →
+                  <span className="text-teal-500 text-[14px] font-medium tracking-[0.7px] mt-1 inline-flex items-center gap-1">
+                    Shop Industry <AnimatedArrow size={13} />
                   </span>
                 </div>
               </Link>
