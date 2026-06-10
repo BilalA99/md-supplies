@@ -1,14 +1,8 @@
-interface Props {
-  className?: string;
-}
+import { ArrowRight } from 'lucide-react'
 
-export function AnimatedArrow({ className }: Props) {
+export function AnimatedArrow({ size = 16, className = '' }: { size?: number; className?: string }) {
   return (
-    <span
-      className={`inline-block transition-transform duration-200 group-hover:translate-x-1 ${className ?? ""}`}
-      aria-hidden
-    >
-      →
-    </span>
-  );
+    <ArrowRight size={size} aria-hidden
+      className={`inline-block shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-1 ${className}`} />
+  )
 }

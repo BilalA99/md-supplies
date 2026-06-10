@@ -99,7 +99,7 @@ export function Footer({ collections, availableCountries = [], currentCountry = 
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-teal-500 hover:border-teal-500 transition-colors"
+                  className="w-9 h-9 rounded-full bg-teal-500 text-white flex items-center justify-center hover:bg-[#006d92] transition-colors"
                 >
                   {svg}
                 </a>
@@ -112,7 +112,7 @@ export function Footer({ collections, availableCountries = [], currentCountry = 
                 placeholder="Enter your email"
                 className="flex-1 bg-transparent border-b border-gray-200 text-sm text-navy-900 placeholder:text-gray-200 pb-2.5 focus:outline-none focus:border-teal-500 transition-colors"
               />
-              <button type="button" className="bg-navy-900 text-white text-sm font-semibold px-6 py-2.5 hover:bg-navy-950 transition-colors shrink-0">
+              <button type="button" className="bg-navy-900 text-white text-sm font-normal uppercase tracking-[0.5px] px-6 py-2.5 hover:bg-navy-950 transition-colors shrink-0">
                 Subscribe
               </button>
             </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { buildCanonical, buildRobots } from '@/lib/seo'
 import { ShieldCheck, Package, Headphones } from "lucide-react";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { AnimatedArrow } from "@/components/ui/AnimatedArrow";
 
 const IMG_HERO      = "/images/about/hero.png";
 const IMG_BRANDS    = "/images/about/brands.png";
@@ -173,19 +174,19 @@ export default function AboutPage() {
         <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 pb-16 md:pb-20 lg:pb-24 flex flex-col lg:flex-row gap-5">
 
           {/* Left – warehouse image with text overlay */}
-          <FadeIn delay={0} className="lg:flex-1 relative overflow-hidden min-h-[360px] lg:min-h-[654px] bg-neutral-700">
+          <FadeIn delay={0} className="group lg:flex-1 relative overflow-hidden min-h-[360px] lg:min-h-[654px] bg-neutral-700">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={IMG_WAREHOUSE}
               alt="MDSupplies warehouse"
               className="absolute inset-0 size-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[rgba(0,0,0,0.8)]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[rgba(0,0,0,0.8)] transition-opacity duration-300 group-hover:opacity-0" />
             <div className="absolute bottom-0 left-0 p-8 sm:p-10">
-              <h3 className="text-[#f9fafc] text-[30px] sm:text-[35px] font-semibold leading-[1.1] mb-3">
+              <h3 className="text-[#f9fafc] text-[30px] sm:text-[35px] font-semibold leading-[1.1] mb-3 drop-shadow-md">
                 Fast fullfilment
               </h3>
-              <p className="text-[#9e9e9e] text-[15px] leading-[1.65] max-w-[480px]">
+              <p className="text-[#9e9e9e] text-[15px] leading-[1.65] max-w-[480px] drop-shadow">
                 Orders ship from our warehouse for 2–3 day delivery nationwide.
               </p>
             </div>
@@ -256,9 +257,9 @@ export default function AboutPage() {
                 </p>
                 <Link
                   href="/contact"
-                  className="text-navy-900 text-[15px] font-semibold tracking-[0.75px] uppercase hover:text-teal-500 transition-colors mt-auto pt-2"
+                  className="group text-navy-900 text-[15px] font-semibold tracking-[0.75px] uppercase hover:text-teal-500 transition-colors mt-auto pt-2 inline-flex items-center gap-1"
                 >
-                  Contact Us →
+                  Contact Us <AnimatedArrow size={14} />
                 </Link>
               </div>
             </FadeIn>

@@ -16,7 +16,6 @@ export function ProductGrid({
     categorySlug,
 }: Props) {
 
-    console.log(categorySlug)
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
