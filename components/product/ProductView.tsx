@@ -267,14 +267,18 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
                 </div>
                 <div className="flex">
                   <div className="flex-1 px-4 py-3">
-                    <p className="text-gray-500 text-[15px] font-medium tracking-[0.3px]">
-                      {product.orderSize ?? '—'}
-                    </p>
+                    {product.orderSize && (
+                      <p className="text-gray-500 text-[15px] font-medium tracking-[0.3px]">
+                        {product.orderSize}
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1 px-4 py-3">
-                    <p className="text-gray-500 text-[15px] font-medium tracking-[0.3px]">
-                      {product.unitsPerOrder ?? product.quantityOfUnits ?? '—'}
-                    </p>
+                    {(product.unitsPerOrder || product.quantityOfUnits) && (
+                      <p className="text-gray-500 text-[15px] font-medium tracking-[0.3px]">
+                        {product.unitsPerOrder ?? product.quantityOfUnits}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
