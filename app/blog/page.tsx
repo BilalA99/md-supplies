@@ -29,6 +29,7 @@ export default async function BlogPage() {
     // If Shopify blog is not yet set up, articles stays empty — page still renders
   }
 
+    console.log(articles)
   return (
 
     <main id="main-content" className="bg-[#f9fafc]">

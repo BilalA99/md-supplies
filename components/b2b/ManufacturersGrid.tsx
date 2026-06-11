@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { AnimatedArrow } from '@/components/ui/AnimatedArrow'
 
 interface Manufacturer {
   name: string
@@ -45,8 +46,8 @@ export function ManufacturersGrid({ manufacturers }: Props) {
               <p className="text-[15px] text-gray-500 leading-[22px] tracking-[0.3px] flex-1">
                 {m.description}
               </p>
-              <span className="text-[13px] font-medium text-teal-500 tracking-[0.26px] group-hover:underline">
-                View Products →
+              <span className="text-[13px] font-medium text-teal-500 tracking-[0.26px] inline-flex items-center gap-1">
+                View Products <AnimatedArrow size={13} />
               </span>
             </div>
           </Link>

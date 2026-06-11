@@ -125,13 +125,11 @@ function RelatedCard({ brand, name, price, image, slug }: {
 
 export function ProductDetail({ product }: { product: ProductDetailData }) {
   const [activeImg,  setActiveImg]  = useState(0);
-  const [activeUnit, setActiveUnit] = useState(1);
-  const [qty,        setQty]        = useState(2);
+  const [activeUnit, setActiveUnit] = useState(0);
+  const [qty,        setQty]        = useState(1);
   const [activeTab,  setActiveTab]  = useState<Tab>("DESCRIPTION");
 
-  const currentUnit = product.units[activeUnit];
-
-  console.log(product)
+  const currentUnit = product.units[activeUnit] ?? product.units[0];
   return (
     <>
        {/*── Breadcrumbs ──*/}
