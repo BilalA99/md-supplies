@@ -5,6 +5,7 @@ const PRODUCT_CARD_FRAGMENT = `#graphql
     handle
     vendor
     availableForSale
+    tags
     priceRange {
       minVariantPrice { amount currencyCode }
       maxVariantPrice { amount currencyCode }

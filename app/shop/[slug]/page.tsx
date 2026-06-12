@@ -72,10 +72,10 @@ function toProductDetailData(p: Product): ProductDetailData {
     brand: p.brandName ?? p.vendor,
     sku: firstVariant?.id.split('/').pop() ?? p.handle,
     name: p.title,
-    rating: 4.8,
-    reviewCount: 127,
+    rating: 0,
+    reviewCount: 0,
     inStock: p.availableForSale,
-    freeShipping: false,
+    freeShipping: p.tags.includes('free-shipping'),
     images: p.images.nodes.map((img) => img.url),
     units: units.length > 0
       ? units
