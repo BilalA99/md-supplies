@@ -89,7 +89,7 @@ describe('getSitemapUrls', () => {
 
   it('paginates products across multiple pages', async () => {
     let productCallCount = 0
-    mockFetch.mockImplementation((query: string) => {
+    mockFetch.mockImplementation((query: string, variables?: Record<string, unknown>) => {
       if (query.includes('GetCollections(')) {
         return Promise.resolve({ collections: { nodes: [] } })
       }
@@ -103,6 +103,7 @@ describe('getSitemapUrls', () => {
             },
           })
         }
+        expect(variables?.after).toBe('cursor-abc')
         return Promise.resolve({
           products: {
             nodes: [{ handle: 'p3' }],

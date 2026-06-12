@@ -64,8 +64,9 @@ async function fetchProductUrls(): Promise<SitemapEntry[]> {
 
       for (const p of data.products.nodes) handles.push(p.handle)
 
-      if (!data.products.pageInfo.hasNextPage) break
-      cursor = data.products.pageInfo.endCursor
+      const nextCursor = data.products.pageInfo.endCursor
+      if (!data.products.pageInfo.hasNextPage || !nextCursor || nextCursor === cursor) break
+      cursor = nextCursor
     }
   } catch {
     return []
