@@ -7,6 +7,7 @@ import type { Product, CollectionProduct, ProductMetafields } from '@/lib/shopif
 import { ProductView } from '@/components/product/ProductView'
 import { PARTNERS } from '@/lib/partners'
 import { ProductSchema } from '@/components/schema/ProductSchema'
+import { BreadcrumbSchema } from '@/components/schema/BreadcrumbSchema'
 import { SITE_URL } from '@/lib/seo/constants'
 
 export const revalidate = 30
@@ -91,31 +92,38 @@ export default async function ProductPage({ params }: Props) {
   const relatedProducts = recsData.related
   const complementaryProducts = recsData.complementary
 
+  const firstVariant = product.variants.nodes[0]
+  const isAvailable = firstVariant?.availableForSale ?? product.availableForSale
+  const productUrl = `${SITE_URL}/product/${slug}`
+
+  const schemaProps = {
+    name: product.title,
+    description: product.description,
+    image: product.images.nodes[0]?.url ?? '',
+    sku: firstVariant?.id?.split('/').pop() ?? slug,
+    brand: product.brandName ?? product.vendor,
+    price: parseFloat(firstVariant?.price?.amount ?? '0'),
+    priceCurrency: firstVariant?.price?.currencyCode ?? 'USD',
+    availability: (isAvailable ? 'InStock' : 'OutOfStock') as 'InStock' | 'OutOfStock' | 'PreOrder',
+    url: productUrl,
+    seller: 'MDSupplies',
+  }
+
+  const breadcrumbItems = [
+    { name: 'Home', item: SITE_URL },
+    { name: 'Shop', item: `${SITE_URL}/categories` },
+    { name: product.title, item: productUrl },
+  ]
+
   return (
     <main className="bg-[#f9fafc]">
+      <ProductSchema {...schemaProps} />
+      <BreadcrumbSchema items={breadcrumbItems} />
       <ProductView
         product={product}
         relatedProducts={relatedProducts}
         complementaryProducts={complementaryProducts}
         partnerSlug={partner?.slug ?? null}
-      />
-      <ProductSchema
-        name={product.title}
-        description={product.description || product.title}
-        image={product.images.nodes[0]?.url ?? ''}
-        sku={product.variants.nodes[0]?.id.split('/').pop() ?? ''}
-        brand={product.brandName ?? product.vendor}
-        price={parseFloat(product.variants.nodes[0]?.price.amount ?? '0')}
-        priceCurrency="USD"
-        availability={
-          product.variants.nodes[0]?.availableForSale
-            ? 'InStock'
-            : product.estimatedRestockDate
-              ? 'PreOrder'
-              : 'OutOfStock'
-        }
-        url={`${SITE_URL}/product/${slug}`}
-        seller="MDSupplies"
       />
     </main>
   )
