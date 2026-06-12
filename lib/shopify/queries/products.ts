@@ -128,3 +128,17 @@ export const GET_PRODUCT_RECS = `#graphql
     }
   }
 `;
+
+export const GET_ALL_PRODUCT_HANDLES = `#graphql
+  query GetAllProductHandles($first: Int!, $after: String) {
+    products(first: $first, after: $after) {
+      nodes {
+        handle
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
