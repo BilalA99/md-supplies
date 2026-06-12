@@ -116,8 +116,6 @@ export default async function ProductPage({ params }: Props) {
         }
         url={`${SITE_URL}/product/${slug}`}
         seller="MDSupplies"
-        shippingDetails="Orders placed before 3 PM EST ship same day. Standard delivery is 2–3 business days."
-        returnPolicy="Returns accepted within 30 days of delivery for unopened, undamaged items."
       />
     </main>
   )

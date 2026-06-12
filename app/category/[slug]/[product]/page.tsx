@@ -13,6 +13,7 @@ import { buildMetadata } from '@/lib/seo'
 import { buildBreadcrumbListSchema, jsonLdSafe } from '@/lib/schema'
 import { SITE_URL } from '@/lib/seo/constants'
 import { ROUTES } from '@/lib/routes'
+import { PARTNERS } from '@/lib/partners'
 
 export const revalidate = 30
 
@@ -190,6 +191,10 @@ export default async function CategoryProductPage({ params }: Props) {
   if (!productData.product) notFound()
   if (productData.product.variants.nodes.length === 0) notFound()
 
+  const partner = PARTNERS.find(
+    (p) => p.isActive && p.vendorName === productData.product!.vendor,
+  ) ?? null
+
   const recsData = await storefrontFetch<{
     related: CollectionProduct[]
     complementary: CollectionProduct[]
@@ -209,6 +214,7 @@ export default async function CategoryProductPage({ params }: Props) {
         relatedProducts={recsData.related}
         complementaryProducts={recsData.complementary}
         breadcrumbs={breadcrumbs}
+        partnerSlug={partner?.slug ?? null}
       />
     </main>
   )

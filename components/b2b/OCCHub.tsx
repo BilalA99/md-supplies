@@ -34,7 +34,7 @@ export function OCCHubPage({ hub }: Props) {
       <section className="w-full bg-[#f9fafc] overflow-x-hidden">
         {/* Server-rendered text: always present in initial HTML for crawlers and screen readers */}
         <div className="sr-only">
-          <h1>{hub.title}</h1>
+          <p>{hub.title}</p>
           <p>{hub.intro}</p>
           <h2>What is the OCC Program?</h2>
           <p>{hub.programExplanation}</p>
