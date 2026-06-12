@@ -72,7 +72,7 @@ export const CLUSTER_LINKS: Record<string, ClusterLinks> = {
       { slug: 'dynarex', name: 'Dynarex' },
       { slug: 'dukal',   name: 'Dukal' },
     ],
-    occEligible: true,
+    occEligible: false,
   },
 
   'mobility': {
