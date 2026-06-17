@@ -16,6 +16,7 @@ import { buildMetadata } from "@/lib/seo";
 import { BlogPostingSchema } from "@/components/schema/BlogPostingSchema";
 import { BreadcrumbSchema } from "@/components/schema/BreadcrumbSchema";
 import { SITE_URL } from "@/lib/seo/constants";
+import { STATIC_ARTICLES } from '@/lib/blog-static'
 
 export const revalidate = 3600;
 
@@ -26,6 +27,10 @@ interface Props {
 async function findArticle(
   handle: string,
 ): Promise<{ blogHandle: string; article: BlogArticle } | null> {
+  if (STATIC_ARTICLES[handle]) {
+    return { blogHandle: 'static', article: STATIC_ARTICLES[handle] }
+  }
+
   const data = await storefrontFetch<{ blogs: { nodes: Array<{ handle: string }> } }>(
     GET_BLOG_HANDLES,
   );
@@ -43,21 +48,42 @@ async function findArticle(
 }
 
 export async function generateStaticParams() {
+  const staticHandles = Object.keys(STATIC_ARTICLES).map((handle) => ({ handle }))
+
   try {
     const data = await storefrontFetch<{
       blogs: { nodes: Array<{ handle: string; articles: { nodes: Array<{ handle: string }> } }> };
     }>(GET_ALL_ARTICLE_HANDLES);
 
-    return data.blogs.nodes.flatMap((blog) =>
+    const shopifyHandles = data.blogs.nodes.flatMap((blog) =>
       blog.articles.nodes.map((a) => ({ handle: a.handle })),
-    );
+    )
+
+    const seen = new Set(staticHandles.map((h) => h.handle))
+    const merged = [
+      ...staticHandles,
+      ...shopifyHandles.filter((h) => !seen.has(h.handle)),
+    ]
+    return merged
   } catch {
-    return [];
+    return staticHandles
   }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { handle } = await params;
+
+  if (STATIC_ARTICLES[handle]) {
+    const article = STATIC_ARTICLES[handle]
+    return buildMetadata({
+      pageType: 'blog-article',
+      title: article.title,
+      description: article.excerpt?.slice(0, 155) ?? undefined,
+      slug: handle,
+      image: article.image?.url,
+    })
+  }
+
   try {
     const found = await findArticle(handle);
     if (!found) return buildMetadata({ pageType: 'blog-article', slug: handle });
