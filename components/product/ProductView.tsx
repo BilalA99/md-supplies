@@ -207,7 +207,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
                 <>
                   <span className="size-[8px] rounded-full shrink-0 bg-green-500" />
                   <span className="text-gray-500 text-[13px] tracking-[0.26px]">
-                    {qty !== null ? `In Stock – ${qty} available` : 'In Stock – Ships Same Day'}
+                    {qty !== null ? `In Stock – ${qty} available` : 'In Stock'}
                   </span>
                 </>
               )}
@@ -228,6 +228,22 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
                 </>
               )}
             </div>
+
+            {/* Product badges — metafield/tag gated */}
+            {(product.tags.includes('free-shipping') || product.tags.includes('rx-required')) && (
+              <div className="flex flex-wrap gap-2">
+                {product.tags.includes('free-shipping') && (
+                  <span className="inline-flex items-center px-3 py-1 text-[13px] font-medium rounded bg-teal-500 text-white">
+                    Free Shipping
+                  </span>
+                )}
+                {product.tags.includes('rx-required') && (
+                  <span className="inline-flex items-center px-3 py-1 text-[13px] font-medium rounded bg-amber-600 text-white">
+                    RX Only
+                  </span>
+                )}
+              </div>
+            )}
 
             <div className="h-px bg-gray-200" />
 
@@ -321,7 +337,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
             <div className="flex flex-wrap gap-5 pt-1">
               {[
                 { icon: <ShieldCheck size={15} className="text-gray-500" />, label: 'QUALITY CERTIFIED' },
-                { icon: <Truck size={15} className="text-gray-500" />, label: '2-3 DAY DELIVERY' },
+                { icon: <Truck size={15} className="text-gray-500" />, label: 'FAST SHIPPING' },
                 { icon: <RotateCcw size={15} className="text-gray-500" />, label: '30-DAY RETURN' },
               ].map(({ icon, label }) => (
                 <div key={label} className="flex items-center gap-2">
@@ -448,7 +464,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
             {activeTab === 'VENDOR SHIPPING & RETURNS' && (
               <div className="flex flex-col gap-4 max-w-[760px]">
                 <p className="text-gray-500 text-[15px] leading-[28px] tracking-[0.3px]">
-                  Orders placed before 3 PM EST ship same day. Standard delivery is 2–3 business days.
+                  Available shipping methods and estimated delivery timeframes are shown at checkout.
                   Bulk orders of 10+ cases qualify for additional volume discounts. Contact your
                   account manager or use the B2B quote form for custom pricing.
                 </p>

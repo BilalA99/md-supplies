@@ -83,6 +83,7 @@ export default async function IndustryDetailPage({ params }: Props) {
     relatedGuides: [],
     ctaText: `Browse ${industryStatic.name} Supplies`,
     ctaLink: `/category/${industryStatic.collectionHandle}`,
+    faq: industryStatic.faq,
   }
 
   return <IndustryPage industry={industry} />

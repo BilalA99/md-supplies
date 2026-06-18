@@ -3,7 +3,7 @@ import { Accordion } from "@/components/ui/Accordion";
 const FAQ_ITEMS = [
   {
     q: "How long does shipping take?",
-    a: "Orders placed before 2PM EST ship same day. Delivery is usually 2–3 business days. Need it faster? Expedited shipping options are available at checkout.",
+    a: "Orders are processed and shipped from our warehouse as quickly as possible. Available shipping methods and estimated delivery timeframes are shown at checkout.",
   },
   {
     q: "Do you offer free shipping?",
