@@ -61,7 +61,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildOrganizationSchema()) }}
         />
         <CartProvider initialCart={initialCart}>
-          <Header menuItems={menuItems} />
+          <Header menuItems={menuItems} collections={collections} />
           {children}
           <Footer
             collections={collections}
