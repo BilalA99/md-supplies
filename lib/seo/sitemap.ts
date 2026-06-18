@@ -6,6 +6,7 @@ import { GET_COLLECTIONS } from '@/lib/shopify/queries/collections'
 import { GET_ALL_PRODUCT_HANDLES } from '@/lib/shopify/queries/products'
 import { GET_ALL_ARTICLE_HANDLES } from '@/lib/shopify/queries/blog'
 import { PARTNERS } from '@/lib/partners'
+import { INDUSTRIES } from '@/lib/industries'
 
 type SitemapEntry = MetadataRoute.Sitemap[number]
 
@@ -107,6 +108,14 @@ export async function getSitemapUrls(
     priority: 0.6,
   }))
 
+  // Industry detail pages are index,follow content pages (built out with FAQs
+  // in Priority #11), so they belong in the sitemap per closeout §12.2.
+  const industryUrls: SitemapEntry[] = INDUSTRIES.map(i => ({
+    url: `${SITE_URL}/industries/${i.slug}`,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
+
   const [categoryUrls, productUrls, articleUrls] = await Promise.all([
     fetchCategoryUrls(),
     fetchProductUrls(),
@@ -118,6 +127,7 @@ export async function getSitemapUrls(
     ...categoryUrls,
     ...productUrls,
     ...partnerUrls,
+    ...industryUrls,
     ...articleUrls,
   ]
 }
