@@ -21,6 +21,9 @@ const STATIC_URLS: SitemapEntry[] = [
   { url: `${SITE_URL}/contact`,         changeFrequency: 'monthly', priority: 0.5 },
   { url: `${SITE_URL}/faq`,             changeFrequency: 'monthly', priority: 0.5 },
   { url: `${SITE_URL}/returns`,         changeFrequency: 'monthly', priority: 0.4 },
+  { url: `${SITE_URL}/policies/privacy`,  changeFrequency: 'yearly', priority: 0.3 },
+  { url: `${SITE_URL}/policies/terms`,    changeFrequency: 'yearly', priority: 0.3 },
+  { url: `${SITE_URL}/policies/shipping`, changeFrequency: 'yearly', priority: 0.3 },
 ]
 
 function isExcludedCollectionHandle(handle: string): boolean {
