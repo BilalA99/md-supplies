@@ -7,6 +7,9 @@ import { Footer } from '@/components/layout/Footer'
 import { CartProvider } from '@/components/store/CartProvider'
 import { CartPopup } from '@/components/store/CartPopup'
 import { SkipLink } from '@/components/a11y/SkipLink'
+import { Suspense } from 'react'
+import { GoogleTagManager } from '@next/third-parties/google'
+import { PageViewTracker } from '@/components/analytics/PageViewTracker'
 import { getCart } from '@/app/actions/cart'
 import { storefrontFetch } from '@/lib/shopify/storefront'
 import { GET_LOCALIZATION } from '@/lib/shopify/queries/markets'
@@ -54,7 +57,13 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${manrope.variable} h-full antialiased`}>
+      {process.env.NEXT_PUBLIC_GTM_ID && (
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+      )}
       <body className="min-h-full flex flex-col">
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
         <SkipLink />
         <script
           type="application/ld+json"
