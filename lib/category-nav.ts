@@ -4,23 +4,25 @@ export type RoadmapCategory = {
   displayName: string
   navGroup: 'primary' | 'more'
   matchedHandles: string[]
+  placeholderSlug: string
 }
 
 // §3.1 approved category structure, checked against the live Shopify
 // catalog on 2026-06-18 via scripts/audit-collections.ts. Categories with
 // an empty matchedHandles array have no live Shopify collection yet and
 // are reported by getUnmappedRoadmapCategories() / the audit script
-// instead of being rendered.
+// instead of being rendered. `placeholderSlug` maps to the §3.5 BunnyCDN
+// placeholder filename: `${placeholderSlug}-placeholder.webp`.
 export const ROADMAP_CATEGORIES: RoadmapCategory[] = [
-  { displayName: 'Gloves', navGroup: 'primary', matchedHandles: ['gloves'] },
-  { displayName: 'Wound Care', navGroup: 'primary', matchedHandles: ['wound-care'] },
-  { displayName: 'Needles & Syringes', navGroup: 'primary', matchedHandles: [] },
-  { displayName: 'Surgical Sutures', navGroup: 'primary', matchedHandles: [] },
-  { displayName: 'Testing', navGroup: 'primary', matchedHandles: ['testing-screening'] },
-  { displayName: 'Exam Room', navGroup: 'primary', matchedHandles: ['exam-room'] },
-  { displayName: 'Respiratory', navGroup: 'primary', matchedHandles: [] },
-  { displayName: 'Mobility', navGroup: 'primary', matchedHandles: ['mobility'] },
-  { displayName: 'Patient Therapy & Rehab', navGroup: 'primary', matchedHandles: ['patient-therapy-rehab'] },
+  { displayName: 'Gloves', navGroup: 'primary', matchedHandles: ['gloves'], placeholderSlug: 'gloves' },
+  { displayName: 'Wound Care', navGroup: 'primary', matchedHandles: ['wound-care'], placeholderSlug: 'wound-care' },
+  { displayName: 'Needles & Syringes', navGroup: 'primary', matchedHandles: [], placeholderSlug: 'needles-syringes' },
+  { displayName: 'Surgical Sutures', navGroup: 'primary', matchedHandles: [], placeholderSlug: 'surgical-sutures' },
+  { displayName: 'Testing', navGroup: 'primary', matchedHandles: ['testing-screening'], placeholderSlug: 'testing' },
+  { displayName: 'Exam Room', navGroup: 'primary', matchedHandles: ['exam-room'], placeholderSlug: 'exam-room' },
+  { displayName: 'Respiratory', navGroup: 'primary', matchedHandles: [], placeholderSlug: 'respiratory' },
+  { displayName: 'Mobility', navGroup: 'primary', matchedHandles: ['mobility'], placeholderSlug: 'mobility' },
+  { displayName: 'Patient Therapy & Rehab', navGroup: 'primary', matchedHandles: ['patient-therapy-rehab'], placeholderSlug: 'patient-therapy-rehab' },
   {
     displayName: 'Surgery & Procedure',
     navGroup: 'primary',
@@ -31,6 +33,7 @@ export const ROADMAP_CATEGORIES: RoadmapCategory[] = [
       'reusable-3-2mm-3-5mm-trocars',
       'reusable-4-5mm-trocars',
     ],
+    placeholderSlug: 'surgery-procedure',
   },
   {
     displayName: 'Apparel',
@@ -44,21 +47,22 @@ export const ROADMAP_CATEGORIES: RoadmapCategory[] = [
       'pants-shirts',
       'undergarments-wraps',
     ],
+    placeholderSlug: 'apparel',
   },
-  { displayName: 'Hygiene', navGroup: 'primary', matchedHandles: ['hygiene'] },
-  { displayName: 'Disinfectants', navGroup: 'primary', matchedHandles: [] },
-  { displayName: 'Home Care', navGroup: 'more', matchedHandles: ['home-care'] },
-  { displayName: 'Emergency Supplies', navGroup: 'more', matchedHandles: ['emergency-supplies'] },
-  { displayName: 'Incontinence', navGroup: 'more', matchedHandles: ['incontinence'] },
-  { displayName: 'IV Therapy', navGroup: 'more', matchedHandles: [] },
-  { displayName: 'Urology & Ostomy', navGroup: 'more', matchedHandles: [] },
-  { displayName: 'Sterilization', navGroup: 'more', matchedHandles: [] },
-  { displayName: 'Dental', navGroup: 'more', matchedHandles: ['dental'] },
-  { displayName: 'Housekeeping & Janitorial', navGroup: 'more', matchedHandles: ['housekeeping-janitorial'] },
-  { displayName: 'Bariatric', navGroup: 'more', matchedHandles: ['bariatric'] },
-  { displayName: 'Room Furniture', navGroup: 'more', matchedHandles: ['seating', 'exam-tables'] },
-  { displayName: 'Face Masks', navGroup: 'more', matchedHandles: ['face-coverings'] },
-  { displayName: 'Pharmacy Products', navGroup: 'more', matchedHandles: [] },
+  { displayName: 'Hygiene', navGroup: 'primary', matchedHandles: ['hygiene'], placeholderSlug: 'hygiene' },
+  { displayName: 'Disinfectants', navGroup: 'primary', matchedHandles: [], placeholderSlug: 'disinfectants' },
+  { displayName: 'Home Care', navGroup: 'more', matchedHandles: ['home-care'], placeholderSlug: 'home-care' },
+  { displayName: 'Emergency Supplies', navGroup: 'more', matchedHandles: ['emergency-supplies'], placeholderSlug: 'emergency-supplies' },
+  { displayName: 'Incontinence', navGroup: 'more', matchedHandles: ['incontinence'], placeholderSlug: 'incontinence' },
+  { displayName: 'IV Therapy', navGroup: 'more', matchedHandles: [], placeholderSlug: 'iv-therapy' },
+  { displayName: 'Urology & Ostomy', navGroup: 'more', matchedHandles: [], placeholderSlug: 'urology-ostomy' },
+  { displayName: 'Sterilization', navGroup: 'more', matchedHandles: [], placeholderSlug: 'sterilization' },
+  { displayName: 'Dental', navGroup: 'more', matchedHandles: ['dental'], placeholderSlug: 'dental' },
+  { displayName: 'Housekeeping & Janitorial', navGroup: 'more', matchedHandles: ['housekeeping-janitorial'], placeholderSlug: 'housekeeping-janitorial' },
+  { displayName: 'Bariatric', navGroup: 'more', matchedHandles: ['bariatric'], placeholderSlug: 'bariatric' },
+  { displayName: 'Room Furniture', navGroup: 'more', matchedHandles: ['seating', 'exam-tables'], placeholderSlug: 'room-furniture' },
+  { displayName: 'Face Masks', navGroup: 'more', matchedHandles: ['face-coverings'], placeholderSlug: 'face-masks' },
+  { displayName: 'Pharmacy Products', navGroup: 'more', matchedHandles: [], placeholderSlug: 'pharmacy-products' },
 ]
 
 export type NavEntry = { displayName: string; href: string }
