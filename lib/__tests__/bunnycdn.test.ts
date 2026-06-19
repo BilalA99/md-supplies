@@ -7,28 +7,32 @@ import {
 } from '../bunnycdn'
 
 describe('getCategoryBannerPath', () => {
-  it('builds the proxy path for a top-level category handle', () => {
-    expect(getCategoryBannerPath('gloves')).toBe('/api/bunny/mdsupplies/categories/gloves.webp')
+  it('resolves a top-level category handle to its curated placeholder image', () => {
+    expect(getCategoryBannerPath('gloves')).toBe('/api/bunny/categories/gloves-placeholder.jpeg')
+  })
+
+  it('falls back to the global placeholder when the handle matches no roadmap category', () => {
+    expect(getCategoryBannerPath('totally-unknown-handle')).toBe(GLOBAL_PRODUCT_PLACEHOLDER)
   })
 })
 
 describe('getSubcategoryBannerPath', () => {
-  it('builds the proxy path for a full subcategory handle', () => {
-    expect(getSubcategoryBannerPath('gloves-nitrile')).toBe('/api/bunny/mdsupplies/subcategories/gloves-nitrile.webp')
+  it('resolves a subcategory handle to its parent category placeholder image', () => {
+    expect(getSubcategoryBannerPath('gloves-nitrile')).toBe('/api/bunny/categories/gloves-placeholder.jpeg')
+  })
+
+  it('falls back to the global placeholder when the handle matches no roadmap category', () => {
+    expect(getSubcategoryBannerPath('totally-unknown-handle')).toBe(GLOBAL_PRODUCT_PLACEHOLDER)
   })
 })
 
 describe('getProductPlaceholderPath', () => {
   it('resolves a top-level category handle to its placeholder', () => {
-    expect(getProductPlaceholderPath('gloves')).toBe(
-      '/api/bunny/mdsupplies/placeholders/products/gloves-placeholder.webp',
-    )
+    expect(getProductPlaceholderPath('gloves')).toBe('/api/bunny/categories/gloves-placeholder.jpeg')
   })
 
   it('resolves a subcategory handle to its parent placeholder', () => {
-    expect(getProductPlaceholderPath('gloves-nitrile')).toBe(
-      '/api/bunny/mdsupplies/placeholders/products/gloves-placeholder.webp',
-    )
+    expect(getProductPlaceholderPath('gloves-nitrile')).toBe('/api/bunny/categories/gloves-placeholder.jpeg')
   })
 
   it('falls back to the global placeholder when no category handle is given', () => {
