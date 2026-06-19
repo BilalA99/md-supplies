@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
   // the app is loaded from a tunnel host instead of localhost. The wildcards
   // cover any teammate's free ngrok tunnel (free domains come in both flavours).
   allowedDevOrigins: ["*.ngrok-free.dev", "*.ngrok-free.app"],
+  images: {
+    // BunnyCDN images are served through the same-origin proxy at
+    // app/api/bunny/[...path]/route.ts (the storage zone has no public Pull
+    // Zone), so no remotePatterns are needed — only this local path is
+    // allowed through next/image's optimizer.
+    localPatterns: [{ pathname: "/api/bunny/**" }],
+  },
 };
 
 export default nextConfig;
