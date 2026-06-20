@@ -5,6 +5,7 @@ import { ROUTES } from '@/lib/routes'
 import { buildCategoryNav } from '@/lib/category-nav'
 
 const EXPLORE = [
+  { label: 'Brands', href: ROUTES.brands },
   { label: 'Partners', href: ROUTES.partners },
   { label: 'Industries', href: ROUTES.industries },
   { label: 'Blog', href: ROUTES.blog },
