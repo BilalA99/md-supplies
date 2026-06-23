@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import type { ProductCardData } from '@/types/product'
 
 function formatCents(cents: number): string {
@@ -35,12 +36,13 @@ export function QuickAddContent({ product, titleId }: Props) {
     <div className="flex flex-col gap-5">
       {/* Product image + title */}
       <div className="flex gap-3 items-start">
-        <div className="w-16 h-16 shrink-0 overflow-hidden bg-neutral-50 border border-gray-200">
-          <img
+        <div className="relative w-16 h-16 shrink-0 overflow-hidden bg-neutral-50 border border-gray-200">
+          <Image
             src={product.image.url}
             alt={product.image.altText}
-            className="w-full h-full object-contain"
-            loading="lazy"
+            fill
+            sizes="64px"
+            className="object-contain"
           />
         </div>
         <div className="flex flex-col gap-0.5 min-w-0">

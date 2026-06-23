@@ -15,6 +15,8 @@ const CATEGORIES_PATH = 'categories'
 
 export const GLOBAL_PRODUCT_PLACEHOLDER = `${PROXY_PREFIX}/${CATEGORIES_PATH}/medical-supplies-placeholder.jpeg`
 
+export const LOGO_PATH = `${PROXY_PREFIX}/logo/logo.avif`
+
 function findRoadmapCategory(handle: string) {
   return ROADMAP_CATEGORIES.find((category) =>
     category.matchedHandles.some((h) => handle === h || handle.startsWith(`${h}-`)),

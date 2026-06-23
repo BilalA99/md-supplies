@@ -106,7 +106,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
 
   const brandDisplay = product.brandName ?? product.vendor
 
-  const variantSku = selectedVariant.id.split('/').pop() ?? ''
+  const variantSku = selectedVariant.sku || (selectedVariant.id.split('/').pop() ?? '')
 
   const SPEC_ROWS: { label: string; value: string | null }[] = [
     { label: 'Material',         value: product.material },
