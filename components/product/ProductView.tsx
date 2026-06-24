@@ -162,6 +162,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
                 {images.slice(0, 6).map((img, i) => (
                   <button
                     key={img.id}
+                    type="button"
                     onClick={() => setActiveImg(i)}
                     className={`relative size-[80px] sm:size-[100px] lg:size-[120px] shrink-0 overflow-hidden bg-[#f9faf9] transition-colors ${
                       activeImg === i
@@ -311,6 +312,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
             <div className="flex gap-3 flex-wrap sm:flex-nowrap">
               <div className="flex border border-[rgba(102,102,100,0.5)] h-[56px] w-[167px] shrink-0">
                 <button
+                  type="button"
                   onClick={() => setOrderQty((q) => Math.max(1, q - 1))}
                   className="flex-1 flex items-center justify-center text-gray-500 text-[20px] font-semibold hover:bg-neutral-50 transition-colors"
                   aria-label="Decrease quantity"
@@ -321,6 +323,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
                   {orderQty}
                 </div>
                 <button
+                  type="button"
                   onClick={() => setOrderQty((q) => q + 1)}
                   className="flex-1 flex items-center justify-center text-gray-500 text-[20px] font-semibold hover:bg-neutral-50 transition-colors"
                   aria-label="Increase quantity"
@@ -361,6 +364,7 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
               {TABS.map((tab) => (
                 <button
                   key={tab}
+                  type="button"
                   onClick={() => setActiveTab(tab)}
                   className={`px-5 py-5 text-[15px] font-semibold tracking-[0.3px] whitespace-nowrap border-b-[3px] transition-colors ${
                     activeTab === tab

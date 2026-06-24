@@ -20,6 +20,7 @@ export function FilterDrawer({ filters, activeFilters, currentSort }: Props) {
       {/* Trigger — mobile only */}
       <div className="lg:hidden mb-4">
         <button
+          type="button"
           onClick={() => setOpen(true)}
           className="flex items-center gap-2 border border-navy-900 text-navy-900 text-[14px] font-semibold px-4 h-[40px] hover:bg-neutral-50 transition-colors"
         >
@@ -42,6 +43,7 @@ export function FilterDrawer({ filters, activeFilters, currentSort }: Props) {
                 Filters
               </span>
               <button
+                type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close filters"
               >
