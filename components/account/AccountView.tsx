@@ -376,9 +376,6 @@ function LoggedInDashboard({
           <div className="bg-white">
             <div className="flex items-center justify-between px-8 pt-8 pb-5 border-b border-gray-200">
               <h2 className="text-navy-900 text-[20px] font-semibold">Saved Addresses</h2>
-              <button className="text-teal-500 text-[14px] font-medium hover:underline">
-                + Add New
-              </button>
             </div>
             {addresses.length === 0 ? (
               <p className="px-8 py-10 text-gray-500 text-[15px]">No saved addresses.</p>
@@ -394,14 +391,6 @@ function LoggedInDashboard({
                         {[addr.address1, addr.address2].filter(Boolean).join(", ")}
                       </span>
                       <span className="text-gray-500 text-[15px]">{formatAddressLine2(addr)}</span>
-                    </div>
-                    <div className="flex gap-4 pt-1">
-                      <button className="text-navy-900 text-[13px] font-medium hover:text-teal-500 transition-colors">
-                        Edit
-                      </button>
-                      <button className="text-gray-500 text-[13px] font-medium hover:text-red-500 transition-colors">
-                        Remove
-                      </button>
                     </div>
                   </div>
                 ))}
@@ -453,7 +442,7 @@ interface AccountViewProps {
 
 export function AccountView({ customer, orders, addresses }: AccountViewProps) {
   return (
-    <main>
+    <main id="main-content">
       {customer ? (
         <LoggedInDashboard customer={customer} orders={orders} addresses={addresses} />
       ) : (

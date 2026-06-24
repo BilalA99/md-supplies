@@ -17,6 +17,7 @@ import { GET_COLLECTIONS_SLIM } from '@/lib/shopify/queries/collections'
 import { GET_MENU } from '@/lib/shopify/queries/menu'
 import { buildOrganizationSchema, jsonLdSafe } from '@/lib/schema'
 import type { LocalizationData, AvailableCountry, SlimCollection, ShopifyMenu } from '@/lib/shopify/types'
+import { MotionConfig } from 'framer-motion'
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -68,16 +69,18 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildOrganizationSchema()) }}
         />
-        <CartProvider initialCart={initialCart}>
-          <Header menuItems={menuItems} collections={collections} />
-          {children}
-          <Footer
-            collections={collections}
-            availableCountries={availableCountries}
-            currentCountry={currentCountry}
-          />
-          <CartPopup />
-        </CartProvider>
+        <MotionConfig reducedMotion="user">
+          <CartProvider initialCart={initialCart}>
+            <Header menuItems={menuItems} collections={collections} />
+            {children}
+            <Footer
+              collections={collections}
+              availableCountries={availableCountries}
+              currentCountry={currentCountry}
+            />
+            <CartPopup />
+          </CartProvider>
+        </MotionConfig>
       </body>
     </html>
   )
