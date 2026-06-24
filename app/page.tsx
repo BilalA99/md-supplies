@@ -11,6 +11,8 @@ import type { CollectionProduct } from '@/lib/shopify/types';
 import { buildMetadata } from '@/lib/seo'
 import { buildWebSiteSchema, jsonLdSafe } from '@/lib/schema'
 
+export const revalidate = 60
+
 export const metadata = buildMetadata({ pageType: 'homepage' })
 
 export default async function Home() {
