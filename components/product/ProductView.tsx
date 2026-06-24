@@ -9,6 +9,7 @@ import type { Product, CollectionProduct, ProductVariant } from '@/lib/shopify/t
 import { ProductImage } from '@/components/shared/ProductImage'
 import { track } from '@/lib/analytics/track'
 import { buildViewItemEvent } from '@/lib/analytics/events'
+import { Breadcrumb } from '@/components/layout/Breadcrumb'
 import { VariantSelector } from './VariantSelector'
 import { AddToCartButton } from './AddToCartButton'
 
@@ -134,23 +135,12 @@ export function ProductView({ product, relatedProducts, complementaryProducts, b
     <>
       {/* Breadcrumb */}
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-5">
-        <nav className="flex items-center gap-2 text-[15px] tracking-[0.3px] flex-wrap">
-          <Link href="/" className="text-gray-500 hover:text-navy-900 transition-colors">Home</Link>
-          {(breadcrumbs ?? []).map((crumb) => (
-            <div key={`sep-${crumb.label}`}>
-              <span className="text-gray-500">›  </span>
-              {crumb.href ? (
-                <Link key={crumb.label} href={crumb.href} className="text-gray-500 hover:text-navy-900 transition-colors">
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span key={crumb.label} className="text-gray-500">{crumb.label}</span>
-              )}
-            </div>
-          ))}
-          <span className="text-gray-500">›</span>
-          <span className="text-navy-900 font-semibold line-clamp-1">{product.title}</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            ...(breadcrumbs ?? []),
+            { label: product.title },
+          ]}
+        />
       </div>
 
       {/* Hero */}
