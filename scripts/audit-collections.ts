@@ -154,7 +154,7 @@ async function main() {
   lines.push('Roadmap categories with no live Shopify collection. Catalog team must create these collections.')
   lines.push('')
   if (surface.actionItems.length === 0) {
-    lines.push('_All 25 roadmap categories are mapped to at least one live Shopify collection._')
+    lines.push(`_All ${ROADMAP_CATEGORIES.length} roadmap categories are mapped to at least one live Shopify collection._`)
   } else {
     lines.push('| Category |')
     lines.push('|---|')

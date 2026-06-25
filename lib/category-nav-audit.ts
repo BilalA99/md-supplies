@@ -1,5 +1,5 @@
 import { EXCLUDED_COLLECTION_HANDLES } from '@/lib/excluded-categories'
-import { buildCategoryNav, getAllowedHandles, ROADMAP_CATEGORIES, type RoadmapCategory } from '@/lib/category-nav'
+import { buildCategoryNav, ROADMAP_CATEGORIES, type RoadmapCategory } from '@/lib/category-nav'
 
 export type AuditCollectionInput = {
   handle: string
@@ -95,7 +95,7 @@ export function buildSurfaceReport(
   const navMore = nav.more.map((e) => e.href.split('/').pop()!)
   const navAll = new Set([...navPrimary, ...navMore])
 
-  const allowed = getAllowedHandles()
+  const allowed = new Set(roadmap.flatMap((c) => c.matchedHandles))
   const hubAll = [...allowed].filter((h) => liveHandles.has(h))
 
   const relatedPool = hubAll.filter((h) => !EXCLUDED_COLLECTION_HANDLES.has(h))
