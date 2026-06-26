@@ -186,12 +186,8 @@ export function CartPageClient() {
           <h2 className="text-navy-900 text-[16px] font-semibold">Order Summary</h2>
           <div className="flex items-center justify-between">
             <span className="text-gray-500 text-[15px] tracking-[0.3px]">Subtotal</span>
-            <span
-              className="text-navy-900 text-[20px] font-bold"
-              aria-label={`$${parseFloat(cart.cost.subtotalAmount.amount).toFixed(2)}`}
-            >
-              <span aria-hidden="true">$</span>
-              {parseFloat(cart.cost.subtotalAmount.amount).toFixed(2)}
+            <span className="text-navy-900 text-[20px] font-bold">
+              ${parseFloat(cart.cost.subtotalAmount.amount).toFixed(2)}
             </span>
           </div>
           <p className="text-gray-500 text-[12px] tracking-[0.24px]">

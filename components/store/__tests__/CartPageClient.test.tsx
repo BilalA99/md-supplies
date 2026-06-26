@@ -56,8 +56,8 @@ const mockCart = {
   attributes: [],
   lines: { nodes: [mockLine] },
   cost: {
-    subtotalAmount: { amount: '29.98', currencyCode: 'USD' },
-    totalAmount: { amount: '29.98', currencyCode: 'USD' },
+    subtotalAmount: { amount: '59.96', currencyCode: 'USD' },
+    totalAmount: { amount: '59.96', currencyCode: 'USD' },
     totalTaxAmount: null,
   },
 }
