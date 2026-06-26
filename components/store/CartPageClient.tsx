@@ -56,7 +56,7 @@ export function CartPageClient() {
     window.location.href = cart.checkoutUrl
   }
 
-  if (lines.length === 0) {
+  if (lines.length === 0 || !cart) {
     return (
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-14">
         <h1 className="text-navy-900 text-[32px] font-bold mb-8">Your Cart</h1>
