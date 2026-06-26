@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { CartPageClient } from '../CartPageClient'
 import { useCart } from '../CartProvider'
+import { track } from '@/lib/analytics/track'
+import { buildViewCartEvent, buildBeginCheckoutEvent } from '@/lib/analytics/events'
 
 vi.mock('../CartProvider', () => ({ useCart: vi.fn() }))
 vi.mock('../CartToast', () => ({ CartToast: () => null }))
@@ -175,5 +177,19 @@ describe('CartPageClient', () => {
     expect(
       screen.getByRole('link', { name: /proceed to checkout/i }),
     ).toHaveAttribute('href', 'https://shop.example.com/checkout')
+  })
+
+  it('fires view_cart analytics event on mount when cart is populated', () => {
+    setupUseCart()
+    render(<CartPageClient />)
+    expect(vi.mocked(buildViewCartEvent)).toHaveBeenCalledOnce()
+    expect(vi.mocked(track)).toHaveBeenCalledOnce()
+  })
+
+  it('fires begin_checkout analytics event when checkout link is clicked', async () => {
+    setupUseCart()
+    render(<CartPageClient />)
+    fireEvent.click(screen.getByRole('link', { name: /proceed to checkout/i }))
+    expect(vi.mocked(buildBeginCheckoutEvent)).toHaveBeenCalledOnce()
   })
 })

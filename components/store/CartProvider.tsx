@@ -39,6 +39,7 @@ export function CartProvider({
 
   const addItem = useCallback(async (variantId: string, qty: number) => {
     try {
+      setLastError(null)
       const updated = await addToCart(variantId, qty)
       setCart(updated)
       setIsOpen(true)
@@ -64,6 +65,7 @@ export function CartProvider({
 
   const removeItem = useCallback(async (lineId: string) => {
     try {
+      setLastError(null)
       const updated = await removeFromCart(lineId)
       setCart(updated)
     } catch (err) {
@@ -74,6 +76,7 @@ export function CartProvider({
 
   const updateItem = useCallback(async (lineId: string, qty: number) => {
     try {
+      setLastError(null)
       const updated = await updateCartLine(lineId, qty)
       setCart(updated)
     } catch (err) {
@@ -99,6 +102,9 @@ export function CartProvider({
     }
   }, [cart])
 
+  const closeCart = useCallback(() => setIsOpen(false), [])
+  const clearError = useCallback(() => setLastError(null), [])
+
   return (
     <CartContext.Provider
       value={{
@@ -109,8 +115,8 @@ export function CartProvider({
         removeItem,
         updateItem,
         openCart,
-        closeCart: () => setIsOpen(false),
-        clearError: () => setLastError(null),
+        closeCart,
+        clearError,
       }}
     >
       {children}
