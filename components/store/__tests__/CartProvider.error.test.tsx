@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, act, cleanup } from '@testing-library/react'
 import { CartProvider, useCart } from '../CartProvider'
-import { removeFromCart, updateCartLine } from '@/app/actions/cart'
+import { addToCart, removeFromCart, updateCartLine } from '@/app/actions/cart'
 
 vi.mock('@/app/actions/cart', () => ({
   addToCart: vi.fn(),
@@ -23,10 +23,11 @@ function ErrorHarness({
   onError: (err: string | null) => void
   onClear: () => void
 }) {
-  const { lastError, clearError, removeItem, updateItem } = useCart()
+  const { lastError, clearError, addItem, removeItem, updateItem } = useCart()
   onError(lastError)
   return (
     <>
+      <button type="button" onClick={() => addItem('variant-1', 1)}>Add</button>
       <button type="button" onClick={() => removeItem('line-1')}>Remove</button>
       <button type="button" onClick={() => updateItem('line-1', 2)}>Update</button>
       <button type="button" onClick={() => { clearError(); onClear() }}>Clear</button>
@@ -81,5 +82,20 @@ describe('CartProvider error state', () => {
 
     await act(async () => { screen.getByText('Clear').click() })
     expect(capturedError).toBeNull()
+  })
+
+  it('sets lastError when addItem fails', async () => {
+    vi.mocked(addToCart).mockRejectedValueOnce(new Error('network error'))
+    let capturedError: string | null = null
+
+    render(
+      <CartProvider initialCart={null}>
+        <ErrorHarness onError={(e) => { capturedError = e }} onClear={vi.fn()} />
+      </CartProvider>,
+    )
+
+    await act(async () => { screen.getByText('Add').click() })
+
+    expect(capturedError).toBe('Failed to add item. Please try again.')
   })
 })
