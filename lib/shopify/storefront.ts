@@ -5,7 +5,6 @@ import { loadEnvConfig } from '@next/env';
 import { serverEnv } from '@/lib/env.server';
 
 loadEnvConfig(process.cwd());
-const STOREFRONT_API_URL = `https://${serverEnv.shopifyStoreDomain}/api/2026-04/graphql.json`;
 
 // cachedRequest is wrapped with React's cache() to deduplicate identical
 // GraphQL calls within a single server-render request. React's cache()
@@ -29,7 +28,7 @@ const cachedRequest = cache(async function cachedRequest<T>(
     headers['Shopify-Storefront-Buyer-Country'] = country;
   }
 
-  const res = await fetch(STOREFRONT_API_URL, {
+  const res = await fetch(`https://${serverEnv.shopifyStoreDomain}/api/2026-04/graphql.json`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ query, variables }),
