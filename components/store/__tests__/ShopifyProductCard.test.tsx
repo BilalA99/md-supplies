@@ -132,4 +132,40 @@ describe('ShopifyProductCard', () => {
     fireEvent.click(screen.getAllByRole('link')[0])
     expect(trackMock).toHaveBeenCalledOnce()
   })
+
+  it('positions the quick-add button bottom-right and hides it behind a desktop hover reveal', () => {
+    const product = makeProduct()
+    render(
+      <ShopifyProductCard
+        product={product}
+        categorySlug="gloves"
+        itemListId="list"
+        itemListName="Gloves"
+      />,
+    )
+
+    const button = screen.getByRole('button', { name: `Quick add ${product.title}` })
+    expect(button.className).toContain('bottom-2')
+    expect(button.className).toContain('right-2')
+    expect(button.className).not.toContain('top-2')
+    // Mobile: visible by default
+    expect(button.className).toContain('opacity-100')
+    // Desktop (sm:+): hidden until hover
+    expect(button.className).toContain('sm:opacity-0')
+    expect(button.className).toContain('sm:group-hover:opacity-100')
+  })
+
+  it('renders no quick-add button for an unavailable product', () => {
+    const product = makeProduct({ availableForSale: false })
+    render(
+      <ShopifyProductCard
+        product={product}
+        categorySlug="gloves"
+        itemListId="list"
+        itemListName="Gloves"
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: `Quick add ${product.title}` })).not.toBeInTheDocument()
+  })
 })
