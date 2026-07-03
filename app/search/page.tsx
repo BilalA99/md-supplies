@@ -139,7 +139,7 @@ export default async function SearchPage({ searchParams }: Props) {
       <div className="max-w-360 mx-auto px-4 sm:px-8 lg:px-14 py-6 flex gap-0 items-start">
         {/* Desktop filter sidebar — only when we have a query + filters */}
         {q.trim() && productFilters.length > 0 && (
-          <aside className="hidden lg:block w-[280px] shrink-0 pr-10 sticky top-[140px]">
+          <aside className="hidden lg:block w-[280px] shrink-0 pr-10 sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto">
             <SearchFilters
               filters={productFilters}
               activeFilters={activeFilterStrings}

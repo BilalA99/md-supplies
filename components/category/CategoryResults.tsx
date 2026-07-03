@@ -90,7 +90,7 @@ export async function CategoryResults({
   return (
     <>
       {/* Desktop filter sidebar */}
-      <aside className="hidden lg:block w-[280px] shrink-0 pr-10 sticky top-[140px]">
+      <aside className="hidden lg:block w-[280px] shrink-0 pr-10 sticky top-[140px] max-h-[calc(100vh-160px)] overflow-y-auto">
         <CategoryFilters
           filters={filters}
           activeFilters={activeFilterStrings}
