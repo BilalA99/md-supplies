@@ -5,6 +5,7 @@ import { storefrontFetch } from '@/lib/shopify/storefront'
 import { GET_COLLECTION } from '@/lib/shopify/queries/collections'
 import type { Collection } from '@/lib/shopify/types'
 import { getVisibleFilters } from '@/lib/shopify/filters'
+import { getAllowedFacets } from '@/lib/filter-registry'
 import { withTrackingParams, type TrackingParamSource } from '@/lib/analytics/tracking-params'
 import { CategoryFilters } from '@/components/category/CategoryFilters'
 import { CategorySort } from '@/components/category/CategorySort'
@@ -65,8 +66,10 @@ export async function CategoryResults({
   const { collection } = data
   const products = collection.products.nodes
   const { pageInfo } = collection.products
-  const rawFilters = collection.products.filters ?? []
-  const filters = getVisibleFilters(rawFilters, activeFilterStrings)
+  // Registry gate: only allowlisted facet sources may reach the filter rail —
+  // the Storefront `filters` response is untrusted input.
+  const allowedFacets = getAllowedFacets(slug, collection.products.filters ?? [])
+  const filters = getVisibleFilters(allowedFacets, activeFilterStrings)
 
   const removeFilterUrl = (filterToRemove: string) => {
     const next = activeFilterStrings.filter((f) => f !== filterToRemove)
@@ -84,7 +87,7 @@ export async function CategoryResults({
   withTrackingParams(persistParams, trackingParamsSource)
 
   const filterLabelMap = new Map(
-    rawFilters.flatMap((g) => g.values.map((v) => [v.input, v.label] as const)),
+    allowedFacets.flatMap((g) => g.values.map((v) => [v.input, v.label] as const)),
   )
 
   return (
