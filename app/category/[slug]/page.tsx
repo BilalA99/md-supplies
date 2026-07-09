@@ -16,6 +16,7 @@ import { getClusterLinks } from '@/lib/cluster-links'
 import { getSubcategories, getRelatedCategories } from '@/lib/category-utils'
 import { CategoryImage } from '@/components/shared/CategoryImage'
 import { getCategoryBannerConfig } from '@/lib/bunnycdn'
+import { isAllowedFilterInput } from '@/lib/filter-registry'
 
 export const revalidate = 30
 
@@ -44,7 +45,10 @@ function parseSortKey(sort?: string): { sortKey: string; reverse: boolean } {
 
 function parseFilterParam(filter?: string | string[]): string[] {
   if (!filter) return []
-  return Array.isArray(filter) ? filter : [filter]
+  const raw = Array.isArray(filter) ? filter : [filter]
+  // Default-deny URL-supplied inputs (rejects tag filters and unknown keys)
+  // before they reach the Storefront API, chips, or pagination links.
+  return raw.filter(isAllowedFilterInput)
 }
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
