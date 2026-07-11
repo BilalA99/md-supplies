@@ -14,6 +14,7 @@ import { GET_LOCALIZATION } from '@/lib/shopify/queries/markets'
 import { GET_COLLECTIONS_SLIM } from '@/lib/shopify/queries/collections'
 import { GET_MENU } from '@/lib/shopify/queries/menu'
 import { buildOrganizationSchema, jsonLdSafe } from '@/lib/schema'
+import { IS_STAGING, SITE_ORIGIN } from '@/lib/site-config'
 import type { LocalizationData, AvailableCountry, SlimCollection, ShopifyMenu } from '@/lib/shopify/types'
 import { MotionConfig } from 'framer-motion'
 
@@ -23,6 +24,9 @@ const manrope = Manrope({
 })
 
 export const metadata: Metadata = {
+  // Base for every relative metadata URL (canonical, og:url, og:image) —
+  // guarded against dev values in lib/site-config.ts (audit H4/L13).
+  metadataBase: new URL(SITE_ORIGIN),
   title: 'MDSupplies',
   description: 'Medical-Grade Supplies, Delivered Fast',
 }
@@ -55,7 +59,7 @@ export default async function RootLayout({
   const collections: SlimCollection[] = collectionsData.collections.nodes
   const menuItems = menuData.menu?.items ?? []
 
-  const isStaging = process.env.NEXT_PUBLIC_IS_STAGING === 'true'
+  const isStaging = IS_STAGING
 
   return (
     <html lang="en" className={`${manrope.variable} h-full antialiased`}>
