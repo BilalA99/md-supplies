@@ -28,23 +28,36 @@ function ogImageUrl(m: Awaited<ReturnType<typeof buildCategoryMetadata>>): strin
   return (m.openGraph as { images?: { url: string }[] })?.images?.[0]?.url
 }
 
+function ogImageDimensions(m: Awaited<ReturnType<typeof buildCategoryMetadata>>): { width?: number; height?: number } | undefined {
+  return (m.openGraph as { images?: { width?: number; height?: number }[] })?.images?.[0]
+}
+
 describe('buildCategoryMetadata — OG image', () => {
   it('passes the collection image through on the canonical (unfiltered, page 1) branch', async () => {
     mockFetch.mockResolvedValue({ collection })
     const m = await buildCategoryMetadata('exam-gloves', {})
     expect(ogImageUrl(m)).toBe('https://cdn.shopify.com/exam-gloves.jpg')
+    const dims = ogImageDimensions(m)
+    expect(dims?.width).toBe(800)
+    expect(dims?.height).toBe(800)
   })
 
   it('passes the collection image through on the filtered/sorted branch', async () => {
     mockFetch.mockResolvedValue({ collection })
     const m = await buildCategoryMetadata('exam-gloves', { sort: 'PRICE_ASC' })
     expect(ogImageUrl(m)).toBe('https://cdn.shopify.com/exam-gloves.jpg')
+    const dims = ogImageDimensions(m)
+    expect(dims?.width).toBe(800)
+    expect(dims?.height).toBe(800)
   })
 
   it('passes the collection image through on the paginated branch', async () => {
     mockFetch.mockResolvedValue({ collection })
     const m = await buildCategoryMetadata('exam-gloves', { page: '2' })
     expect(ogImageUrl(m)).toBe('https://cdn.shopify.com/exam-gloves.jpg')
+    const dims = ogImageDimensions(m)
+    expect(dims?.width).toBe(800)
+    expect(dims?.height).toBe(800)
   })
 
   it('falls back to the default OG image when the collection has no image', async () => {
