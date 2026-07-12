@@ -22,6 +22,7 @@ export async function BreadcrumbSchema({ items, currentUrl }: Props) {
     <script
       type="application/ld+json"
       nonce={nonce}
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   )
