@@ -460,3 +460,52 @@ describe('ProductView — You May Also Need cards are clickable (Task 4)', () =>
     })
   })
 })
+
+// Shopify's Product.options.values is not always complete on this store.
+// Verified live 2026-08-25 for toothbrush-tube-clear: one declared Color value
+// ("Clear") but two active, in-stock, separately-priced variants. Because the
+// selector was gated on options.values, it was suppressed entirely and the
+// second variant had no control that could select it.
+describe('ProductView — variants missing from options.values stay reachable', () => {
+  const underReportedOptions = [{ id: 'opt1', name: 'Color', values: ['Blue'] }]
+
+  it('renders a button for the variant the option list omits', () => {
+    renderPDP(blueVariant, { options: underReportedOptions })
+    expect(screen.getByRole('button', { name: 'Color: Blue' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Color: White' })).toBeTruthy()
+  })
+
+  it('shows the selector at all, instead of hiding it as a single-value option', () => {
+    renderPDP(blueVariant, { options: underReportedOptions })
+    expect(screen.getByText('SELECT Color')).toBeTruthy()
+  })
+
+  it('lets the recovered variant actually be selected', () => {
+    renderPDP(blueVariant, { options: underReportedOptions })
+    fireEvent.click(screen.getByRole('button', { name: 'Color: White' }))
+    // These two fixtures share a SKU and differ by manufacturer number, so
+    // that is the identifier that proves the selection actually moved.
+    expect(screen.getByText('Mfr #: 10277WT')).toBeTruthy()
+  })
+
+  it('treats the product as multi-colour, so the title tracks the selection', () => {
+    renderPDP(blueVariant, { options: underReportedOptions })
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('— Blue')
+    fireEvent.click(screen.getByRole('button', { name: 'Color: White' }))
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('— White')
+  })
+
+  it('leaves a genuinely single-variant product without a selector', () => {
+    renderPDP(blueVariant, {
+      options: [{ id: 'opt1', name: 'Title', values: ['Default Title'] }],
+      variants: { nodes: [{ ...blueVariant, selectedOptions: [{ name: 'Title', value: 'Default Title' }] }] },
+    })
+    expect(screen.queryByText('SELECT Title')).toBeNull()
+  })
+
+  it('is unchanged when options.values already covers every variant', () => {
+    renderPDP(blueVariant)
+    expect(screen.getByRole('button', { name: 'Color: Blue' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Color: White' })).toBeTruthy()
+  })
+})

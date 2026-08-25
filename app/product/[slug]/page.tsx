@@ -23,6 +23,7 @@ import { gateFreeShippingClaims } from '@/lib/shipping-resolver/free-shipping-ga
 import { attachCardShippingDisplay } from '@/lib/shipping-resolver/attach'
 import { resolveInitialVariant } from '@/lib/product/resolve-variant'
 import { buildCanonical } from '@/lib/seo/canonical'
+import { logServerError } from '@/lib/log-error'
 
 // Fully dynamic (root layout reads headers() for the CSP nonce, M10, so this
 // route can't be static/ISR'd — see the trade-off note in app/layout.tsx).
@@ -156,12 +157,24 @@ export default async function ProductPage({ params, searchParams }: Props) {
   }
 
   // Contextual middle crumb(s) (audit L12, superseded by the tag-derived
-  // registry): the product's own resolveCanonicalCategory result, plus the
-  // matching L2 subcategory when its tags carry one — always the canonical
-  // parent, never a boundary subcategory's cross-link parent, regardless of
-  // which URL the visitor arrived from. Falls back to the generic Shop crumb
+  // registry): the product's own explicit `category:` tag, plus the matching L2
+  // subcategory when its tags carry one. Falls back to the generic Shop crumb
   // when the product resolves no category at all.
-  const summaries = await fetchProductTagSummaries()
+  //
+  // The tag scan is ancillary to this page: it supplies the breadcrumb and
+  // nothing else. It is also the single most expensive fetch here (~30 requests
+  // over the whole catalogue), so it is the most likely to time out — and an
+  // unguarded await meant one slow scan returned a 500 for a product whose own
+  // data had already loaded perfectly. Degrading to the neutral Shop crumb
+  // keeps the page (price, variants, add-to-cart, structured data) intact.
+  //
+  // Deliberately NOT swallowed silently: the failure is logged, because a
+  // permanently-failing scan shows up to a customer only as a subtly missing
+  // breadcrumb and would otherwise never be noticed.
+  const summaries = await fetchProductTagSummaries().catch((err) => {
+    logServerError('product-breadcrumb-tag-scan', err)
+    return [] as Awaited<ReturnType<typeof fetchProductTagSummaries>>
+  })
   const l2Nodes = buildL2Tree(summaries)
   const { categories, subcategories } = parseProductTags(product.tags)
   const categoryPath = getProductCategoryPath({ handle: product.handle, categories, subcategories }, l2Nodes)

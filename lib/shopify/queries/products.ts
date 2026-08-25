@@ -126,6 +126,9 @@ export const GET_PRODUCT = `#graphql
       # requested, so every one resolved to null. Two of them cause real harm and
       # are on the assignment, so they are fetched here.
       #
+      # 2026-08-25: the remaining SPEC_ROWS metafields are now selected too —
+      # see the block after shippingReturns below.
+      #
       # brandName: the PDP renders brandName ?? vendor. With brandName null it
       # fell through to vendor on every product, which prints MedPlus on a
       # Dukal-branded bandage (product 8692868743384, SKU DUK 7609). vendor is the
@@ -133,9 +136,9 @@ export const GET_PRODUCT = `#graphql
       # fallback was wrong for about half the catalogue.
       #
       # Both definitions are storefront-readable (PUBLIC_READ), verified live.
-      # The remaining metafields normalizeProduct maps are still unfetched: adding
-      # them changes what the spec sections render, which needs review rather than
-      # a quiet switch-on.
+      # (The rest of the metafields normalizeProduct maps WERE still unfetched
+      # when this comment was written; they are selected in the specifications
+      # block further down, added 2026-08-25.)
       brandName: metafield(namespace: "custom", key: "brand_name") { value }
       # DEV-SHIP-04 (final business rule): both ETA fields below are queried
       # and normalized for compatibility/live-theme use only. custom.backorder
@@ -169,6 +172,63 @@ export const GET_PRODUCT = `#graphql
       # lib/policy/rich-text.ts:shopifyRichTextToPlainParagraphs before it
       # reaches resolveReturnPolicy's vendorPolicyText.
       shippingReturns: metafield(namespace: "custom", key: "shipping_returns") { value }
+
+      # ── Structured specifications (Specifications tab) ────────────────────
+      # normalizeProduct has mapped these since it was written and
+      # ProductView's SPEC_ROWS renders a row for each, but nothing ever
+      # SELECTED them, so all fifteen resolved to null, SPEC_ROWS filtered to
+      # length 0, and the specifications table was suppressed on every product
+      # while the same fields were live as category filters.
+      #
+      # Every key and type below was read off this store's Admin API metafield
+      # definitions on 2026-08-25 — not guessed, and not copied from the filter
+      # registry's facet ids (a facet id proves a field is FILTERABLE, which is
+      # published separately from the Search & Discovery index and does not
+      # imply it is storefront-READABLE). All fifteen report
+      # access.storefront = PUBLIC_READ, so these selections return real values.
+      #
+      # Two definitions the Specifications tab would otherwise want are
+      # deliberately absent because they report access.storefront = NONE and
+      # would resolve to null no matter what this query asks for:
+      #   custom.certification            (list.single_line_text_field)
+      #   custom.customer_filter_category (list.single_line_text_field)
+      # Both remain fully live as FILTERS. Making them readable is a Shopify
+      # Admin change to the definition, not a change here.
+      #
+      # NOTE ON TYPES: the five marked list. below return a JSON ARRAY STRING
+      # (e.g. ["Microalbumin","Creatinine"]), not display text. They are
+      # flattened by lib/shopify/metafield-value.ts at render time, the same
+      # way rich_text_field values are flattened by lib/policy/rich-text.ts.
+      material: metafield(namespace: "custom", key: "material") { value }
+      color: metafield(namespace: "custom", key: "color") { value }
+      sterility: metafield(namespace: "custom", key: "sterility") { value }
+      thickness: metafield(namespace: "custom", key: "thickness") { value }
+      gloveSize: metafield(namespace: "custom", key: "glove_size") { value }
+      needleGauge: metafield(namespace: "custom", key: "needle_gauge") { value }
+      needleLength: metafield(namespace: "custom", key: "needle_length") { value }
+      # Trailing underscore is the real key, verified live — size_length does
+      # not exist and silently returned null.
+      sizeLength: metafield(namespace: "custom", key: "size_length_") { value }
+      use: metafield(namespace: "custom", key: "use") { value }
+      features: metafield(namespace: "custom", key: "features") { value }
+      otherFeatures: metafield(namespace: "custom", key: "other_features") { value }   # list.
+      typeList: metafield(namespace: "custom", key: "type") { value }                  # list.
+      testsFor: metafield(namespace: "custom", key: "tests_for") { value }             # list.
+      detectableDrugs: metafield(namespace: "custom", key: "detectable_drugs") { value } # list.
+      adulterants: metafield(namespace: "custom", key: "adulterants") { value }        # list.
+      # Product-level fallback behind custom.units_per_order for the QUANTITY
+      # cell (resolveVariantValue in ProductView) — mapped by normalizeProduct
+      # and read by the UI, but never selected until now, so the fallback could
+      # never fire.
+      quantityOfUnits: metafield(namespace: "custom", key: "quantity_of_units") { value }
+      #
+      # custom.custom_badge_1/2/3 are deliberately NOT selected. The
+      # definitions exist and are PUBLIC_READ, but their type is BOOLEAN, while
+      # ProductView renders each one as its own badge TEXT. A boolean carries no
+      # label, so wiring them up would print "true" to the customer. What each
+      # flag is meant to SAY is a product decision, not something this query can
+      # infer. custom.custom_dynamic_badge is likewise a file_reference (an
+      # image), not text. See docs/client-training/SHOPIFY_TO_STOREFRONT_MAP.md.
     }
   }
 `;

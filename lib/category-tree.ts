@@ -359,16 +359,82 @@ export function buildCategoryTreeNav(
   return { primary, more }
 }
 
+/**
+ * The department + subcategory a product belongs to, for its breadcrumb and
+ * canonical placement.
+ *
+ * PRECEDENCE (Bilal, 2026-08-25 — deterministic rule for client training):
+ *
+ *   0. If the matched subcategory is a declared BOUNDARY subcategory, its
+ *      canonical parent wins outright. See "the one exception" below.
+ *   1. Otherwise the product's own explicit `category:` tag, when it names a
+ *      real L1.
+ *   2. Otherwise, the matched subcategory's parent L1 (the inferred fallback).
+ *   3. Otherwise nothing — the caller shows a neutral Shop crumb.
+ *
+ * WHAT CHANGED AND WHY
+ * This function used to check the subcategory FIRST and take
+ * `subcategory.parentTag` whenever a subcategory matched, consulting the
+ * product's own `category:` tag only when no subcategory did. That meant an
+ * INFERRED department (the statistically dominant parent of a subcategory
+ * across the whole catalogue, computed in buildL2Tree) silently overrode an
+ * EXPLICIT one the merchant had set on the product.
+ *
+ * The practical effect was unexplainable to a merchant: editing
+ * `category:` on a product could leave its breadcrumb unchanged, because some
+ * other products sharing its subcategory outvoted it. That is precisely the
+ * behaviour the client-training walkthrough has to be able to state simply, so
+ * the explicit tag now wins.
+ *
+ * `resolveCanonicalCategory` is still the source of the explicit value, so the
+ * handful of PRODUCT_CATEGORY_OVERRIDES entries continue to take priority over
+ * the raw tag — they exist to correct products whose own tags are wrong.
+ *
+ * The subcategory itself is UNCHANGED by this: it is still whichever L2 node
+ * matches the product's `subcategory:` tags, and it is still returned. Only the
+ * choice of DEPARTMENT changed, and only when the two disagree.
+ *
+ * THE ONE EXCEPTION — boundary subcategories (BOUNDARY_L1_OVERRIDES).
+ * A boundary subcategory is one that plausibly belongs under two departments
+ * (exam-tables under both Room Furniture and Exam Room). For those, the
+ * canonical parent still wins over the product's own tag, and that is
+ * deliberate: the canonical parent is what mints the subcategory's URL, so
+ * letting each product pick its own department would make
+ * /category/room-furniture/exam-tables and /category/exam-room/exam-tables both
+ * live, split internal links between them, and give one page two indexable
+ * addresses — the exact duplicate-address problem getCategorySlug exists to
+ * prevent. A boundary subcategory has ONE canonical home by design.
+ *
+ * Boundary subcategories are identified structurally, by carrying a
+ * crossLinkParentTag, which buildL2Tree sets only for BOUNDARY_L1_OVERRIDES
+ * entries — three subcategories out of ~790. Everything else follows the
+ * explicit-beats-inferred rule above.
+ */
 export function getProductCategoryPath(
   summary: ProductTagSummary,
   l2Nodes: L2Node[],
 ): { category: L1CategoryDef; subcategory: L2Node | null } | null {
   const subcategory = l2Nodes.find((n) => summary.subcategories.includes(n.tag)) ?? null
-  const categoryTag = subcategory ? subcategory.parentTag : resolveCanonicalCategory(summary)
-  if (!categoryTag) return null
 
-  const category = CATEGORY_TREE_L1.find((c) => c.tag === categoryTag)
-  if (!category) return null
+  // Boundary subcategories keep exactly one canonical parent — see above.
+  if (subcategory?.crossLinkParentTag) {
+    const canonical = CATEGORY_TREE_L1.find((c) => c.tag === subcategory.parentTag)
+    if (canonical) return { category: canonical, subcategory }
+  }
 
-  return { category, subcategory }
+  // Explicit first. Only accepted when it names a real L1 — a typo'd or retired
+  // tag must fall through to the inferred parent rather than 404 the crumb.
+  const explicitTag = resolveCanonicalCategory(summary)
+  const explicit = explicitTag
+    ? CATEGORY_TREE_L1.find((c) => c.tag === explicitTag) ?? null
+    : null
+  if (explicit) return { category: explicit, subcategory }
+
+  const inferredTag = subcategory?.parentTag
+  const inferred = inferredTag
+    ? CATEGORY_TREE_L1.find((c) => c.tag === inferredTag) ?? null
+    : null
+  if (inferred) return { category: inferred, subcategory }
+
+  return null
 }

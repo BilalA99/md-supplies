@@ -22,6 +22,8 @@ import { hasUsablePrice } from '@/lib/purchasability'
 import { useSelectedVariant } from './useSelectedVariant'
 import { resolveVariantValue, resolveVariantSupplement } from '@/lib/product/resolve-variant-value'
 import { shopifyRichTextToPlainParagraphs, shopifyRichTextToParagraphSpans, type RichTextSpan } from '@/lib/policy/rich-text'
+import { formatMetafieldValue } from '@/lib/shopify/metafield-value'
+import { hasMultipleColors, hasSelectableOptions, resolveProductOptions } from '@/lib/product/resolve-options'
 
 type Tab = 'SPECIFICATIONS' | 'ORDER PACKAGING' | 'VENDOR SHIPPING & RETURNS' | 'REVIEWS'
 const TABS: Tab[] = ['SPECIFICATIONS', 'ORDER PACKAGING', 'VENDOR SHIPPING & RETURNS', 'REVIEWS']
@@ -160,39 +162,59 @@ export function ProductView({ product, initialVariant, relatedProducts, compleme
 
   const variantSku = selectedVariant.sku || (selectedVariant.id.split('/').pop() ?? '')
 
+  // Options reconciled against the variants that actually exist — Shopify's
+  // `options.values` omits real variant values on this store (see
+  // lib/product/resolve-options.ts). Everything below that asks "what can be
+  // chosen?" must read THIS, not product.options, or an available variant
+  // becomes unreachable.
+  const effectiveOptions = resolveProductOptions(product.options, product.variants.nodes)
+
   // LG-03: a color-neutral parent title must still show which color is
   // selected, so the H1/breadcrumb can't contradict the SKU/image the
   // shopper just picked. Only a genuine multi-value color dimension carries
   // this identity risk — a single-color product or an Each/Case selection
   // doesn't rename the product, so those get no suffix.
-  const isMultiColor = product.options.some(
-    (o) => o.name.toLowerCase() === 'color' && o.values.length > 1,
-  )
+  const isMultiColor = hasMultipleColors(effectiveOptions)
   const selectedColor = isMultiColor
     ? selectedVariant.selectedOptions.find((o) => o.name.toLowerCase() === 'color')?.value
     : undefined
   const displayTitle = selectedColor ? `${product.title} — ${selectedColor}` : product.title
 
-  const SPEC_ROWS: { label: string; value: string | null }[] = [
-    { label: 'Material',         value: product.material },
-    { label: 'Color',            value: product.color },
-    { label: 'Sterility',        value: product.sterility },
-    { label: 'Thickness',        value: product.thickness },
-    { label: 'Glove Size',       value: product.gloveSize },
-    { label: 'Needle Gauge',     value: product.needleGauge },
-    { label: 'Needle Length',    value: product.needleLength },
-    { label: 'Size / Length',    value: product.sizeLength },
-    { label: 'Use',              value: product.use },
-    { label: 'Features',         value: product.features },
-    { label: 'Other Features',   value: product.otherFeatures },
-    { label: 'Type',             value: product.typeList },
-    { label: 'Tests For',        value: product.testsFor },
-    { label: 'Detectable Drugs', value: product.detectableDrugs },
-    { label: 'Adulterants',      value: product.adulterants },
-  ].filter((r) => r.value != null)
+  // Structured specifications. Row ORDER is unchanged — it is the approved
+  // reading order, general attributes before category-specific ones.
+  //
+  // Every value goes through formatMetafieldValue rather than being rendered
+  // raw: five of these keys (Other Features, Type, Tests For, Detectable Drugs,
+  // Adulterants) are `list.single_line_text_field`, whose Storefront value is a
+  // JSON array string, so rendering raw would print `["Microalbumin",...]` to
+  // the customer. It also collapses blank/whitespace-only and empty-array
+  // values to null so an unpopulated field cannot occupy a row — the same
+  // "hidden when blank" rule the tab already applied, now applied to values
+  // that are present-but-empty rather than only to absent ones.
+  const SPEC_ROWS: { label: string; value: string }[] = (
+    [
+      { label: 'Material',         value: product.material },
+      { label: 'Color',            value: product.color },
+      { label: 'Sterility',        value: product.sterility },
+      { label: 'Thickness',        value: product.thickness },
+      { label: 'Glove Size',       value: product.gloveSize },
+      { label: 'Needle Gauge',     value: product.needleGauge },
+      { label: 'Needle Length',    value: product.needleLength },
+      { label: 'Size / Length',    value: product.sizeLength },
+      { label: 'Use',              value: product.use },
+      { label: 'Features',         value: product.features },
+      { label: 'Other Features',   value: product.otherFeatures },
+      { label: 'Type',             value: product.typeList },
+      { label: 'Tests For',        value: product.testsFor },
+      { label: 'Detectable Drugs', value: product.detectableDrugs },
+      { label: 'Adulterants',      value: product.adulterants },
+    ] as const
+  ).flatMap(({ label, value }) => {
+    const formatted = formatMetafieldValue(value)
+    return formatted ? [{ label, value: formatted }] : []
+  })
 
-  const hasOptions = product.options.length > 0 &&
-    !(product.options.length === 1 && product.options[0].values.length === 1)
+  const hasOptions = hasSelectableOptions(effectiveOptions)
 
   // AeroWalk pilot: variant-specific order unit overrides the shared product
   // value; falls back to it only when the variant's own field is blank
@@ -388,7 +410,7 @@ export function ProductView({ product, initialVariant, relatedProducts, compleme
             {/* Variant selector */}
             {hasOptions && (
               <VariantSelector
-                options={product.options}
+                options={effectiveOptions}
                 variants={product.variants.nodes}
                 selectedVariant={selectedVariant}
                 onSelect={selectVariant}

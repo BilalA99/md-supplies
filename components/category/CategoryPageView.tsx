@@ -31,6 +31,7 @@ import { isAllowedFilterInput } from '@/lib/filter-registry'
 import { withTrackingParams } from '@/lib/analytics/tracking-params'
 import { getNonce } from '@/lib/csp-nonce'
 import { getCategorySeo } from '@/lib/seo/categorySeo'
+import { logServerError } from '@/lib/log-error'
 import { FAQSection } from '@/components/b2b/FAQSection'
 
 // Server-rendered category view for the single canonical route
@@ -252,13 +253,34 @@ export async function CategoryPageView({ slug, sp }: { slug: string; sp: Categor
     ? CATEGORY_TREE_L1.find((c) => c.tag === featured.parentTag)
     : undefined
 
+  // The two fetches fail differently ON PURPOSE, so the page can tell a missing
+  // collection apart from a degraded one:
+  //
+  //   collection hero  — load-bearing. A null result is a real 404 (the handle
+  //                      does not exist); a thrown error propagates to
+  //                      app/category/[slug]/error.tsx, so an API outage reads
+  //                      as "Category Unavailable" and never as a legitimately
+  //                      empty category.
+  //   tag scan         — ancillary. It supplies only the subcategory links
+  //                      below, and is by far the most expensive call here
+  //                      (~30 requests across the catalogue). Letting it take
+  //                      down an otherwise-healthy category page trades a
+  //                      complete listing for an error screen, which is the
+  //                      worse outcome for a shopper.
+  //
+  // A page rendered without subcategory links is still a correct, complete
+  // category page; the products come from the collection/tag query in
+  // CategoryResults, which is untouched by this.
   const [data, summaries] = await Promise.all([
     storefrontFetch<{ collection: CollectionHero | null }>(
       GET_COLLECTION_HERO,
       { handle: shopifyHandle },
       collectionFetchOptions(shopifyHandle),
     ),
-    fetchProductTagSummaries(),
+    fetchProductTagSummaries().catch((err) => {
+      logServerError('category-subcategory-tag-scan', err)
+      return [] as Awaited<ReturnType<typeof fetchProductTagSummaries>>
+    }),
   ])
 
   if (!data.collection) notFound()

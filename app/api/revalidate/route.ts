@@ -64,6 +64,26 @@ export async function POST(request: Request) {
     if (handle) invalidate(`product:${handle}`)
     // Deletes/creates also change collection listings, but per-collection
     // membership isn't in the payload — the 300s fetch revalidate covers it.
+    //
+    // 'category-tree' is the full-catalog `category:`/`subcategory:` tag scan
+    // (lib/category-tree-data.server.ts). It is cached for 3600s, an order of
+    // magnitude longer than everything else here, because the scan costs ~30
+    // requests. It was NOT invalidated by this webhook, which is the whole of
+    // the unexplained "I edited the product an hour ago and the category still
+    // hasn't changed" delay: the PDP refreshed within seconds via product:<handle>
+    // while the department, breadcrumb, subcategory lists and /categories tile
+    // counts all kept serving the pre-edit tag scan until the hour expired.
+    //
+    // Every products/* topic invalidates it because a product's TAGS are what
+    // the scan reads, and a tag change arrives as an ordinary products/update
+    // with nothing in the payload to distinguish it from a price edit. The
+    // 3600s revalidate stays as the backstop for a missed or unregistered
+    // webhook; this just stops the backstop from being the primary mechanism.
+    //
+    // Cost is bounded by the 'max' profile below: the stale scan keeps being
+    // served while the refresh happens in the background, so a burst of product
+    // edits cannot stampede the Storefront API or block a request on 30 calls.
+    invalidate('category-tree')
   } else if (topic.startsWith('collections/')) {
     invalidate('collections')
     if (handle) invalidate(`collection:${handle}`)

@@ -246,3 +246,80 @@ describe('custom.backorder selected on every surface query', () => {
     expect(SEARCH_PRODUCTS).toContain('key: "backorder"')
   })
 })
+
+// ─── structured specifications (Specifications tab) ──────────────────────────
+//
+// normalizeProduct has always mapped these and ProductView has always rendered
+// a SPEC_ROWS row for each, but nothing SELECTED them, so every one resolved to
+// null and the table was suppressed on every product in the catalogue. Guarded
+// here because that failure is invisible: no type error, no runtime error, just
+// a table that never appears.
+//
+// Keys and types were read off this store's Admin API metafield definitions on
+// 2026-08-25. All fifteen report access.storefront = PUBLIC_READ.
+describe('GET_PRODUCT structured specification selections', () => {
+  const SPEC_ALIAS_TO_KEY: Record<string, string> = {
+    material: 'material',
+    color: 'color',
+    sterility: 'sterility',
+    thickness: 'thickness',
+    gloveSize: 'glove_size',
+    needleGauge: 'needle_gauge',
+    needleLength: 'needle_length',
+    sizeLength: 'size_length_',
+    use: 'use',
+    features: 'features',
+    otherFeatures: 'other_features',
+    typeList: 'type',
+    testsFor: 'tests_for',
+    detectableDrugs: 'detectable_drugs',
+    adulterants: 'adulterants',
+  }
+
+  for (const [alias, key] of Object.entries(SPEC_ALIAS_TO_KEY)) {
+    it(`requests ${alias} as custom.${key}`, () => {
+      // Exact source substring rather than a regex: the alias and the key must
+      // BOTH be right, and pairing them in one assertion is what catches an
+      // alias silently pointing at the wrong key.
+      expect(GET_PRODUCT).toContain(`${alias}: metafield(namespace: "custom", key: "${key}")`)
+    })
+  }
+
+  // The trailing underscore is real and was verified live; `size_length`
+  // (without it) does not exist and silently returns null on every product.
+  it('uses size_length_ with its trailing underscore, not size_length', () => {
+    expect(GET_PRODUCT).toContain('key: "size_length_"')
+    expect(GET_PRODUCT).not.toMatch(/key: "size_length"/)
+  })
+
+  // Product-level fallback behind custom.units_per_order for the QUANTITY cell.
+  it('requests quantityOfUnits, the product-level packaging fallback', () => {
+    expect(GET_PRODUCT).toContain('quantityOfUnits: metafield(namespace: "custom", key: "quantity_of_units")')
+  })
+
+  // These two report access.storefront = NONE. Selecting them would return null
+  // regardless, and would imply to a reader that the PDP can show them.
+  it.each(['certification', 'customer_filter_category'])(
+    'does not request custom.%s, which is filterable but not storefront-readable',
+    (key) => {
+      expect(GET_PRODUCT).not.toContain(`key: "${key}"`)
+    },
+  )
+
+  // The definitions are BOOLEAN (and file_reference), while ProductView renders
+  // each badge as text — selecting them would print "true" to a customer.
+  it.each(['custom_badge_1', 'custom_badge_2', 'custom_badge_3', 'custom_dynamic_badge'])(
+    'does not request custom.%s, whose type does not match how the UI renders it',
+    (key) => {
+      expect(GET_PRODUCT).not.toContain(`key: "${key}"`)
+    },
+  )
+
+  it('is still a single parseable template literal after the additions', () => {
+    // A backtick inside a comment in this query terminated the template
+    // literal during this very change. Cheap check that it survived.
+    expect(GET_PRODUCT).toContain('query GetProduct')
+    expect(GET_PRODUCT).toContain('key: "adulterants"')
+    expect(typeof GET_PRODUCT).toBe('string')
+  })
+})

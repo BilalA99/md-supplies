@@ -44,13 +44,51 @@ function resolvePath(pageType: PageType, slug?: string, parentSlug?: string): st
 /** Google's SERP title display cuts off around this many characters. */
 const MAX_TITLE_LENGTH = 60
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * True when a title already ends with the site name, so appending it again
+ * would double the brand.
+ *
+ * Matched live on 2026-08-25: 13 of 60 sampled products carry a Shopify
+ * `seo.title` ending in "| MDSupplies" (merchandising writes the brand into the
+ * field by hand). Those titles then had " — MDSupplies" appended, producing
+ * "Dawn Mist Nail Brush, Box of 50 | MDSupplies — MDSupplies" — and only
+ * SOMETIMES, because the length guard below silently dropped the second copy
+ * once the total passed 60 characters, so the catalogue disagreed with itself.
+ *
+ * The separator class is deliberately broad (|, -, –, —, :, ·, •, comma, or
+ * plain whitespace) because the brand is hand-appended and the separator is not
+ * consistent. Anchored on a separator-or-start so a title merely CONTAINING the
+ * word (e.g. a hypothetical "NotMDSupplies") is not treated as branded.
+ */
+function endsWithSiteName(base: string): boolean {
+  return new RegExp(`(^|[\\s|:,\\-–—·•])\\s*${escapeRegExp(SITE_NAME)}\\s*$`, 'i').test(base)
+}
+
 /**
  * Appends the brand suffix only if the result fits the SERP display limit.
  * A long enriched/product title is more valuable than a truncated brand tag,
  * so once the budget is blown the suffix is dropped rather than overflowing.
+ *
+ * When the base is ALREADY branded, only the part of the suffix that adds new
+ * information is appended — nothing for the plain " — MDSupplies", but the
+ * qualifier survives for " — MDSupplies Partner" / " — MDSupplies Blog", so a
+ * pre-branded partner title still reads as a partner page rather than losing
+ * that word. The length guard then applies unchanged to whatever is left.
  */
 function withBrandSuffix(base: string, suffix: string): string {
-  const full = `${base}${suffix}`
+  let effectiveSuffix = suffix
+  if (endsWithSiteName(base)) {
+    // Everything in the suffix after the site name — '' for the plain suffix,
+    // ' Partner' / ' Blog' for the qualified ones.
+    const index = suffix.toLowerCase().lastIndexOf(SITE_NAME.toLowerCase())
+    effectiveSuffix = index === -1 ? suffix : suffix.slice(index + SITE_NAME.length)
+  }
+
+  const full = `${base}${effectiveSuffix}`
   if (full.length <= MAX_TITLE_LENGTH) return full
   if (base.length <= MAX_TITLE_LENGTH) return base
 

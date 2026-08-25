@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import type { Product, ProductImage, ProductVariant } from '@/lib/shopify/types'
+import { hasMultipleColors, resolveProductOptions } from '@/lib/product/resolve-options'
 
 /**
  * The single selected-variant view model for both PDP routes (LG-03).
@@ -21,8 +22,14 @@ export function useSelectedVariant(product: Product, initialVariant: ProductVari
   // image would misrepresent this one" risk — an Each/Case selection or a
   // single-color product has no such risk, so the shared gallery remains a
   // safe fallback there (unchanged behavior).
-  const isMultiColor = product.options.some(
-    (o) => o.name.toLowerCase() === 'color' && o.values.length > 1,
+  //
+  // Reconciled against the variants first, for the same reason ProductView
+  // does: Shopify's `options.values` under-reports real variant values on this
+  // store, and reading it directly here made a genuinely multi-colour product
+  // look single-colour — which silently re-enabled the shared gallery
+  // fallback this guard exists to prevent.
+  const isMultiColor = hasMultipleColors(
+    resolveProductOptions(product.options, product.variants.nodes),
   )
 
   // Reset the active gallery image whenever the selected variant changes —

@@ -274,3 +274,92 @@ describe('buildMetadata — explicit canonical override', () => {
     expect((m.alternates as { canonical?: string })?.canonical).toBe(`${BASE}/category/gloves`)
   })
 })
+
+// ─── brand suffix appears exactly once ───────────────────────────────────────
+//
+// Merchandising hand-writes the brand into Shopify's `seo.title` on part of the
+// catalogue: 13 of 60 products sampled live on 2026-08-25 end in "| MDSupplies".
+// Those titles then had " — MDSupplies" appended, producing
+// "… | MDSupplies — MDSupplies" — and only on the shorter ones, because the
+// 60-character guard silently dropped the duplicate on longer titles, so the
+// catalogue was inconsistent with itself.
+
+// Case-insensitive on purpose: merchandising's hand-written brand is not
+// consistently cased, and "appears once" is the claim regardless of casing.
+function countBrand(title: string): number {
+  return (title.match(/mdsupplies/gi) ?? []).length
+}
+
+describe('buildMetadata — brand suffix is never doubled', () => {
+  it('appends the brand to a product title that lacks it', () => {
+    const m = buildMetadata({ pageType: 'product', title: 'Dawn Mist Toothbrush Tube, Clear' })
+    expect(m.title).toBe('Dawn Mist Toothbrush Tube, Clear — MDSupplies')
+    expect(countBrand(m.title as string)).toBe(1)
+  })
+
+  it('does not append when the Shopify SEO title already ends in the brand', () => {
+    const m = buildMetadata({ pageType: 'product', title: 'Dawn Mist Nail Brush, Box of 50 | MDSupplies' })
+    expect(m.title).toBe('Dawn Mist Nail Brush, Box of 50 | MDSupplies')
+    expect(countBrand(m.title as string)).toBe(1)
+  })
+
+  it.each([
+    'Toothbrush Tube | MDSupplies',
+    'Toothbrush Tube - MDSupplies',
+    'Toothbrush Tube – MDSupplies',
+    'Toothbrush Tube — MDSupplies',
+    'Toothbrush Tube: MDSupplies',
+    'Toothbrush Tube, MDSupplies',
+    'Toothbrush Tube MDSupplies',
+    'Toothbrush Tube | MDSupplies ',
+    'Toothbrush Tube | mdsupplies',
+  ])('recognises the brand regardless of separator or casing: %s', (title) => {
+    expect(countBrand(buildMetadata({ pageType: 'product', title }).title as string)).toBe(1)
+  })
+
+  it('is consistent across title lengths, short and long alike', () => {
+    const short = buildMetadata({ pageType: 'product', title: 'Tube | MDSupplies' }).title as string
+    const long = buildMetadata({
+      pageType: 'product',
+      title: 'Dawn Mist Adult Comb with Handle 8.6in Black | MDSupplies',
+    }).title as string
+    expect(countBrand(short)).toBe(1)
+    expect(countBrand(long)).toBe(1)
+  })
+
+  it('applies to category and subcategory titles too', () => {
+    expect(countBrand(buildMetadata({ pageType: 'category', title: 'Gloves | MDSupplies' }).title as string)).toBe(1)
+    expect(countBrand(buildMetadata({ pageType: 'category', title: 'Gloves' }).title as string)).toBe(1)
+  })
+
+  it('does not treat a word merely containing the brand as branded', () => {
+    const m = buildMetadata({ pageType: 'product', title: 'NotMDSupplies' })
+    expect(m.title).toBe('NotMDSupplies — MDSupplies')
+  })
+
+  it('does not strip a brand that appears mid-title rather than at the end', () => {
+    const m = buildMetadata({ pageType: 'product', title: 'MDSupplies Own Brand Gauze' })
+    expect(m.title).toBe('MDSupplies Own Brand Gauze — MDSupplies')
+  })
+
+  it('keeps the qualifier on a pre-branded partner title instead of losing the word', () => {
+    const m = buildMetadata({ pageType: 'partner-detail', title: 'Dukal | MDSupplies' })
+    expect(m.title).toBe('Dukal | MDSupplies Partner')
+    expect(countBrand(m.title as string)).toBe(1)
+  })
+
+  it('keeps the qualifier on a pre-branded blog title', () => {
+    const m = buildMetadata({ pageType: 'blog-article', title: 'Glove Guide | MDSupplies' })
+    expect(m.title).toBe('Glove Guide | MDSupplies Blog')
+    expect(countBrand(m.title as string)).toBe(1)
+  })
+
+  it('leaves unbranded partner and blog titles unchanged in behaviour', () => {
+    expect(buildMetadata({ pageType: 'partner-detail', title: 'Dukal' }).title).toBe('Dukal — MDSupplies Partner')
+    expect(buildMetadata({ pageType: 'blog-article', title: 'Glove Guide' }).title).toBe('Glove Guide — MDSupplies Blog')
+  })
+
+  it('does not double the brand on the homepage title, which contains it already', () => {
+    expect(countBrand(buildMetadata({ pageType: 'homepage' }).title as string)).toBe(1)
+  })
+})

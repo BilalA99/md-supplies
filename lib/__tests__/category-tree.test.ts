@@ -463,6 +463,123 @@ describe('getProductCategoryPath', () => {
   })
 })
 
+// Precedence rule (Bilal, 2026-08-25). The department a product shows in must
+// be explainable to a merchant in one sentence: the category: tag you set is
+// the department you get. Before this, an INFERRED department (the dominant
+// parent of the subcategory across the whole catalogue) silently overrode the
+// EXPLICIT tag on the product, so editing category: could appear to do nothing.
+describe('getProductCategoryPath — explicit category: beats inferred parent', () => {
+  // toothbrush-holder's dominant parent is hygiene, but this product says
+  // home-care. A non-boundary subcategory must not overrule the product.
+  const l2Nodes = [
+    { tag: 'toothbrush-holder', parentTag: 'hygiene', productCount: 40 },
+    { tag: 'exam-tables', parentTag: 'room-furniture', crossLinkParentTag: 'exam-room', productCount: 28 },
+  ]
+
+  it('uses the product\'s own category: tag when it disagrees with the subcategory parent', () => {
+    const path = getProductCategoryPath(
+      { handle: 'tube', categories: ['home-care'], subcategories: ['toothbrush-holder'] },
+      l2Nodes,
+    )
+    expect(path?.category.tag).toBe('home-care')
+    // The subcategory is still resolved and still shown — only the department changed.
+    expect(path?.subcategory?.tag).toBe('toothbrush-holder')
+  })
+
+  it('agrees with the inferred parent when the tags agree', () => {
+    const path = getProductCategoryPath(
+      { handle: 'tube', categories: ['hygiene'], subcategories: ['toothbrush-holder'] },
+      l2Nodes,
+    )
+    expect(path?.category.tag).toBe('hygiene')
+    expect(path?.subcategory?.tag).toBe('toothbrush-holder')
+  })
+
+  it('falls back to the subcategory parent when the explicit tag is not a real L1', () => {
+    // A typo must degrade to something sensible, never to a broken crumb.
+    const path = getProductCategoryPath(
+      { handle: 'tube', categories: ['hygeine-typo'], subcategories: ['toothbrush-holder'] },
+      l2Nodes,
+    )
+    expect(path?.category.tag).toBe('hygiene')
+  })
+
+  it('falls back to the subcategory parent when the product has no category: tag', () => {
+    const path = getProductCategoryPath(
+      { handle: 'tube', categories: [], subcategories: ['toothbrush-holder'] },
+      l2Nodes,
+    )
+    expect(path?.category.tag).toBe('hygiene')
+  })
+
+  it('returns null when neither an explicit nor an inferred department resolves', () => {
+    expect(
+      getProductCategoryPath({ handle: 'x', categories: ['nope'], subcategories: ['unknown'] }, l2Nodes),
+    ).toBeNull()
+  })
+
+  // The deliberate exception. A boundary subcategory has ONE canonical parent
+  // because that parent mints its URL; letting each product choose would give
+  // /category/<a>/exam-tables and /category/<b>/exam-tables both a claim to the
+  // same page. Documented in getProductCategoryPath.
+  it('keeps the canonical parent for a BOUNDARY subcategory, overriding the explicit tag', () => {
+    const path = getProductCategoryPath(
+      { handle: 'table', categories: ['exam-room'], subcategories: ['exam-tables'] },
+      l2Nodes,
+    )
+    expect(path?.category.tag).toBe('room-furniture')
+    expect(path?.subcategory?.tag).toBe('exam-tables')
+  })
+
+  it('applies the boundary rule regardless of which side the product is tagged', () => {
+    for (const tag of ['exam-room', 'room-furniture', 'gloves']) {
+      const path = getProductCategoryPath(
+        { handle: 'table', categories: [tag], subcategories: ['exam-tables'] },
+        l2Nodes,
+      )
+      expect(path?.category.tag).toBe('room-furniture')
+    }
+  })
+
+  // PRODUCT_CATEGORY_OVERRIDES corrects products whose own tags are wrong, so
+  // it must still outrank the raw tag under the new precedence.
+  it('still honours PRODUCT_CATEGORY_OVERRIDES ahead of the raw category: tag', () => {
+    const path = getProductCategoryPath(
+      {
+        handle: 'surgical-aspirator-tips-1-4-green',
+        categories: ['exam-room'],
+        subcategories: [],
+      },
+      l2Nodes,
+    )
+    expect(path?.category.tag).toBe('dental')
+  })
+})
+
+// Shopify's Product Type is not an input to category resolution at all — it is
+// not even queried. This is asserted so the client-training claim
+// ("Product Type does not affect where a product appears") stays true.
+describe('getProductCategoryPath — Shopify Product Type is not an input', () => {
+  const l2Nodes = [{ tag: 'toothbrush-holder', parentTag: 'hygiene', productCount: 40 }]
+
+  it('resolves from tags alone; the summary type carries no productType field', () => {
+    const summary = { handle: 'tube', categories: ['hygiene'], subcategories: ['toothbrush-holder'] }
+    const path = getProductCategoryPath(summary, l2Nodes)
+    expect(path?.category.tag).toBe('hygiene')
+    // ProductTagSummary is handle + categories + subcategories. Nothing else
+    // reaches this function, so no Product Type value could influence it.
+    expect(Object.keys(summary).sort()).toEqual(['categories', 'handle', 'subcategories'])
+  })
+
+  it('gives the same result for two products that differ only in Product Type', () => {
+    // Product Type would live on the product record, never in the summary —
+    // so two products with identical tags are indistinguishable here.
+    const a = getProductCategoryPath({ handle: 'a', categories: ['hygiene'], subcategories: [] }, l2Nodes)
+    const b = getProductCategoryPath({ handle: 'b', categories: ['hygiene'], subcategories: [] }, l2Nodes)
+    expect(a?.category.tag).toBe(b?.category.tag)
+  })
+})
+
 import { buildCategoryTreeNav } from '../category-tree'
 
 describe('buildCategoryTreeNav', () => {
