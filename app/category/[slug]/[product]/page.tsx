@@ -41,6 +41,8 @@ import { gateFreeShippingClaims } from '@/lib/shipping-resolver/free-shipping-ga
 import { attachCardShippingDisplay } from '@/lib/shipping-resolver/attach'
 import { normalizeProduct, type RawProduct } from '@/lib/shopify/normalize'
 import { resolveInitialVariant } from '@/lib/product/resolve-variant'
+import { withOfferedVariants } from '@/lib/product/offered-variants'
+import { stripVariantParam } from '@/lib/product/stale-variant-url'
 import { buildCanonical } from '@/lib/seo/canonical'
 import { compareFacetValues } from '@/lib/catalog/facet-order'
 
@@ -297,8 +299,20 @@ export default async function CategoryProductPage({ params, searchParams }: Prop
   if (!rawProductData.product) notFound()
   // Same metafield flattening as /product/[slug] — without it ProductView
   // receives raw `{ value }` objects (broken spec rows / backorder date).
-  const productData = { product: normalizeProduct(rawProductData.product) }
+  //
+  // withOfferedVariants for the same reason as /product/[slug]: Shopify's
+  // variants connection still returns variants the merchant has withdrawn from
+  // this sales channel, and every consumer below (price, SKU, add-to-cart,
+  // Product schema) must see the same narrowed set the selector does.
+  const productData = { product: withOfferedVariants(normalizeProduct(rawProductData.product)) }
   if (productData.product.variants.nodes.length === 0) notFound()
+
+  // Stale `?variant=` link — send it to the clean product URL rather than
+  // rendering a different variant under the old address. Mirrors
+  // /product/[slug] exactly so the two PDP routes cannot drift.
+  if (sp.variant && !productData.product.variants.nodes.some((v) => v.id === sp.variant)) {
+    redirect(stripVariantParam(`/category/${slug}/${handle}`, sp))
+  }
 
   const partner = PARTNERS.find(
     (p) => p.isActive && p.vendorName === productData.product!.vendor,

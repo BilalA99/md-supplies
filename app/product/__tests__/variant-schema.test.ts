@@ -130,9 +130,23 @@ describe('ProductPage — ?variant= resolution feeds ProductSchema, not just Pro
     expect(breadcrumbEl.props.currentUrl).toBe('https://mdsupplies.com/product/flame-glove')
   })
 
-  it('with an unknown ?variant= id, falls back to the default variant rather than erroring', async () => {
-    const { schemaEl } = await renderProductPage('gid://shopify/ProductVariant/does-not-exist')
-    expect(schemaEl.props.sku).toBe('SKU-BLUE')
+  // Behaviour changed 2026-08-25. This used to assert a silent fall back to the
+  // default variant, which returned 200 and left the dead `?variant=` in the
+  // address bar, so the shopper re-shared it. It now redirects to the clean
+  // product URL instead — same destination content, but the stale parameter
+  // stops circulating. The original intent (never error on bad input) is
+  // unchanged and asserted below.
+  it('with an unknown ?variant= id, redirects to the clean product URL', async () => {
+    await expect(renderProductPage('gid://shopify/ProductVariant/does-not-exist'))
+      .rejects.toThrow('NEXT_REDIRECT')
+  })
+
+  it('the unknown-variant redirect targets the product URL with no variant param', async () => {
+    // next/navigation's redirect() encodes the destination in the thrown error.
+    const err = await renderProductPage('gid://shopify/ProductVariant/does-not-exist')
+      .then(() => null, (e: unknown) => e as { digest?: string })
+    expect(err?.digest).toContain('/product/flame-glove')
+    expect(err?.digest).not.toContain('variant=')
   })
 
   it('with a valid ?variant=, structured data mpn and image follow Red, not Blue', async () => {

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { buildMetadata, trimDescription } from '@/lib/seo'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { storefrontFetch } from '@/lib/shopify/storefront'
 import { GET_PRODUCT, GET_PRODUCT_RECS } from '@/lib/shopify/queries/products'
 import type { CollectionProduct } from '@/lib/shopify/types'
@@ -22,6 +22,8 @@ import { isShippingResolverEnabled } from '@/lib/shipping-resolver/flag'
 import { gateFreeShippingClaims } from '@/lib/shipping-resolver/free-shipping-gate'
 import { attachCardShippingDisplay } from '@/lib/shipping-resolver/attach'
 import { resolveInitialVariant } from '@/lib/product/resolve-variant'
+import { withOfferedVariants } from '@/lib/product/offered-variants'
+import { stripVariantParam } from '@/lib/product/stale-variant-url'
 import { buildCanonical } from '@/lib/seo/canonical'
 import { logServerError } from '@/lib/log-error'
 
@@ -91,7 +93,19 @@ export default async function ProductPage({ params, searchParams }: Props) {
   )
   if (!rawData.product) notFound()
 
-  const product = normalizeProduct(rawData.product)
+  // Narrowed to the variants this sales channel still offers, BEFORE anything
+  // reads them. Shopify's variants connection keeps returning a variant the
+  // merchant has withdrawn from this channel (see
+  // lib/product/offered-variants.ts), so without this the selector hides it
+  // while the price, SKU, add-to-cart and Product schema all still sell it.
+  const product = withOfferedVariants(normalizeProduct(rawData.product))
+
+  // A `?variant=` link that no longer names an offered variant is stale — send
+  // it to the clean product URL rather than quietly rendering a different
+  // variant under the old address (lib/product/stale-variant-url.ts).
+  if (sp.variant && !product.variants.nodes.some((v) => v.id === sp.variant)) {
+    redirect(stripVariantParam(`/product/${slug}`, sp))
+  }
 
   const partner = PARTNERS.find(
     (p) => p.isActive && p.vendorName === product.vendor,

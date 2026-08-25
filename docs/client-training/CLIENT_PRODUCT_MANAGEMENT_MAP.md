@@ -68,23 +68,45 @@ customers use.
 > **Website:** The struck-through price plus a "Save N%" tag.
 
 > **Shopify: Variant availability**
-> **Website:** An unavailable option button is greyed out; an unavailable product shows "Out of Stock".
-> *There is deliberately no "In Stock" message, because supplier inventory isn't live.*
+> **Website:** In principle an unavailable option is greyed out and shows "Out of Stock" — but **in practice this never happens on our store**, because we don't track inventory in Shopify (stock sits with the suppliers). Shopify therefore reports everything as available.
+> **To take something off sale, use publishing** — see "Taking one colour or size off the website" above.
+> *There is deliberately no "In Stock" message either, for the same reason: supplier inventory isn't live.*
 
 > **Shopify: Variant image**
 > **Website:** The gallery leads with the selected colour's own photo.
 > **Important:** On a **multi-colour** product, a colour with **no image assigned** shows a **placeholder** rather than another colour's photo. Assign an image to every colour.
 
-> **Taking one colour off sale.** If you withdraw a colour — unpublishing or
-> archiving it — the website stops offering it, which is exactly right. The
-> Toothbrush Tube is the live example: Blue was taken off, so the product page
-> now shows Clear only and no colour selector at all, because there is only one
-> thing to choose.
->
-> One thing to know: **the withdrawn colour is still attached to the product
-> underneath.** Customers can't reach it by browsing, but the old variant hasn't
-> been fully detached. If you want a colour gone completely rather than just
-> hidden, mention it to the dev team — there's a known gap we've written up.
+---
+
+### Taking one colour or size off the website
+
+**This is the procedure. It works on any product, and you can do it yourself.**
+
+1. Open the product in Shopify.
+2. **Manage publishing.**
+3. Turn that variant **off** for **Md Supplies Headless**.
+
+That's it. Within a few minutes:
+
+- the colour disappears from the option buttons
+- if only one colour is left, the selector disappears entirely — there's nothing
+  left to choose between
+- nobody can buy it, price it, or reach it, even with an old link
+- Google is told to use the main product page instead
+
+**It is completely reversible.** Turn it back on when stock returns and the
+colour comes straight back, with its price and images intact. Nothing is
+deleted, and no order history is affected.
+
+> **Why "out of stock" on its own doesn't do this.** This store doesn't track
+> inventory in Shopify — none of the ~10,000 products do, because stock sits with
+> the suppliers. So Shopify always thinks everything is in stock, and there's no
+> quantity you can set that removes something from the site. Publishing is the
+> control that works.
+
+**If a colour is gone for good** (discontinued, never coming back), you can
+instead delete the variant from the product. Publishing off is the better default
+— it's reversible, and it does the same thing for the customer.
 
 > **Shopify metafields: Order Size / Units per Order**
 > **Website:** The dark navy **UNIT / QUANTITY** box above Add to Cart, and the **Order Packaging** tab.
@@ -317,6 +339,7 @@ held in the site's code. If a category SEO change doesn't appear, that's why.
 | **Estimated Back Order Restock Date** | Only works alongside Backorder. A past date is ignored. |
 | **Free Shipping** | A shipping promise. Never tick speculatively. |
 | **Collections / plain collection tags** | Changes which products appear in a department's grid. |
+| **Variant publishing (Manage publishing)** | The supported way to take one colour/size off the site. Reversible, and safe to do yourself. |
 | **Vendor** | Changes the returns-policy heading and partner links. **Not the brand.** |
 
 ## 🛑 DO NOT CHANGE WITHOUT DEVELOPER REVIEW
@@ -343,7 +366,7 @@ held in the site's code. If a category SEO change doesn't appear, that's why.
 | Right breadcrumb, missing from the grid | It has the `category:` tag but isn't in the collection — add the plain collection tag |
 | In the grid, but wrong/no breadcrumb | It's in the collection but missing the `category:` tag |
 | Wrong department despite the right tag | A few subcategories (exam tables, barrier sleeves, vital sign monitors) are pinned to one fixed department by design — ask a developer |
-| A variant can't be selected | Its value may be missing from the option list in Shopify |
+| A colour/size vanished from a product | It's been turned off for Md Supplies Headless in Manage publishing — turn it back on to restore it |
 | Specification not on the page | Check the field is filled in; Certification and Customer Filter Category are filter-only by design |
 | Free Shipping badge not showing | The shipping data must also confirm it |
 | Filter didn't appear | The metafield must be "filterable" in Shopify **and** allowlisted in code |

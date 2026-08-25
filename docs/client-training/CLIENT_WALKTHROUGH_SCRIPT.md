@@ -101,13 +101,29 @@ right. Have all three products open in tabs on both sides.
 >
 > *(switch to the Toothbrush Tube product page)*
 >
-> And here's the flip side, using the toothbrush tube. This one used to come in
-> Clear and Blue, and Blue has since been taken off. Look at the page — **no
-> colour selector at all**, just the Clear product. That's correct: there's only
-> one option now, so there's nothing to choose between.
+> And here's the flip side, using the toothbrush tube — this is the bit you asked
+> about, so I'll show it properly.
 >
-> That's the general rule. **If you withdraw a colour or size in Shopify, the site
-> stops offering it.** You don't need to do anything else.
+> This one used to come in Clear and Blue. Blue went out of stock, and you took it
+> off. Look at the page: **no colour selector at all**, just Clear. That's exactly
+> right — there's only one option now, so there's nothing to choose between.
+>
+> *(switch to Shopify, the tube, Manage publishing)*
+>
+> **This is how you do that on any product.** Open the product, go to Manage
+> publishing, and turn that variant off for **Md Supplies Headless**. That's the
+> whole thing.
+>
+> Within a few minutes it's gone from the site — off the buttons, not buyable, and
+> not reachable even by an old link someone saved. And it's **completely
+> reversible**: turn it back on when stock returns and the colour comes straight
+> back with its price and images. Nothing is deleted.
+>
+> One thing worth knowing, because it explains why this wasn't obvious. **We don't
+> track inventory in Shopify** — none of our products do, because stock sits with
+> the suppliers. So marking something out of stock doesn't remove it, because
+> Shopify always thinks everything is in stock. Publishing is the control that
+> actually works.
 >
 > And on pricing — a variant priced at zero shows **"Contact for pricing"** and
 > can't be added to the cart. That's deliberate: it's a quote-only item, not a

@@ -506,42 +506,75 @@ selector, which is correct for this product: Clear is the only thing offered.
 `components/product/__tests__/ProductView.test.tsx` pins it with four regression
 tests so the "fix" cannot be reintroduced.
 
-### 6.3 Residual risk — OPEN, not fixed here
+### 6.3 Withdrawing a variant — the supported, self-service path
 
-Because `variants` still contains the withdrawn variant, it remains reachable
-outside the selector:
+**This is the procedure to give the client.** In Shopify: open the product,
+Manage publishing, and turn the variant off for **Md Supplies Headless**.
+Nothing else is needed, and it is fully reversible.
 
-- `?variant=<withdrawn gid>` is accepted by `resolveInitialVariant`, which would
-  render its SKU, price and Add to Cart.
-- `getDefaultVariant` picks the first **purchasable** variant. Clear is first for
-  this product, so it wins today — but that is ordering luck, not a guarantee.
-- `ProductSchema` would describe the withdrawn variant in that state.
+What the storefront does with that, as of this branch:
 
-This is **pre-existing** and was not introduced or fixed on this branch. The
-targeted fix would be to *narrow* `product.variants` to those whose
-`selectedOptions` all appear in `options.values` — the inverse of the reverted
-change. It is deliberately left as a recommendation rather than shipped
-speculatively, since this is the second reading of the same signal and it
-deserves a decision rather than another inference.
+| Surface | Behaviour |
+| --- | --- |
+| Option selector | The value is gone. One remaining value → no selector at all |
+| Price / SKU / Add to Cart | Cannot resolve to the withdrawn variant |
+| `Product` JSON-LD | Never advertises the withdrawn SKU |
+| Packaging fallbacks | Sibling checks ignore it, so it cannot suppress a shared value |
+| An existing `?variant=` link | **Redirects to the clean product URL**, keeping utm/gclid |
 
-### 6.3 The rest of the chain
+`lib/product/offered-variants.ts` narrows `product.variants` to those whose
+`selectedOptions` all still appear in `options.values`, before anything reads
+them. It is applied in **both** PDP routes so they cannot drift.
 
-| Step | Source | Code |
-| --- | --- | --- |
-| Heading text | `` `SELECT ${option.name}` `` | `VariantSelector.tsx:41` |
-| Price per button | matched variant's `price` | `VariantSelector.tsx:87` |
-| Button disabled | `resolvePurchasable()` — price ≤ 0 **or** not `availableForSale` | `VariantSelector.tsx:65` |
-| Selector hidden | one option with one value | `ProductView.tsx` |
-| Initial selection | `?variant=<gid>`, else first **purchasable** variant | `lib/product/resolve-variant.ts` |
-| Selection persistence | `router.replace('?variant=…', { scroll: false })` | `useSelectedVariant.ts:56` |
-| Title suffix | ` — <Color>` when a Color option has >1 value | `ProductView.tsx:177` |
-| Gallery | variant image first, then the rest | `useSelectedVariant.ts:45` |
-| Add to cart | selected variant's `id` | `AddToCartButton` |
+It **fails open by design**: if narrowing would leave nothing sellable — a
+malformed options list, values that match no variant — the original list is
+returned untouched. Hiding a real product is a worse failure than showing a
+withdrawn one, so this can never empty a product page.
 
-> **Multi-colour gallery rule.** For a multi-colour product whose selected
-> variant has **no** image, `galleryImages` is deliberately empty and a
-> placeholder renders — the shared gallery is *not* used, to avoid showing Blue's
-> photo on Clear. Every colour variant needs its own image in Shopify.
+### 6.4 Stale `?variant=` links
+
+`lib/product/stale-variant-url.ts` + `redirect()` in both PDP routes. A variant
+parameter that no longer names an offered variant (withdrawn, deleted, or plain
+garbage) sends the shopper to the clean product URL.
+
+**Not a 404**, deliberately: the product is still on sale, only one of its
+colours is gone. A 404 would break every bookmark and discard the link equity of
+an indexed URL to say something untrue.
+
+**SEO.** `?variant=` URLs already carry a canonical pointing at the clean product
+URL (`buildCanonical`, strategy `base-product`), so Google consolidates them
+either way. The redirect is additive: it takes the stale parameter out of
+circulation at the point of use, so shoppers stop re-sharing a dead link. The
+destination is exactly the canonical, so the two can never conflict.
+
+Because both PDP routes have a `loading.tsx`, they stream — the 200 shell is
+flushed before the page body runs, so Next cannot emit a redirect *header*.
+Verified live, it emits both of these instead, which is standard Next behaviour
+for a streamed route:
+
+```text
+NEXT_REDIRECT;replace;/product/toothbrush-tube-clear;307    ← client navigation
+<meta http-equiv="refresh" content="1;url=/product/toothbrush-tube-clear">  ← no-JS
+```
+
+So a browser cleans the URL immediately, a non-JS crawler follows the meta
+refresh, and anything that reads neither still gets the correct default-variant
+content under a canonical pointing at that same URL. Tracking parameters are
+carried through the redirect; only `variant` is dropped.
+
+**Verified live** (2026-08-25, against the real withdrawn Blue variant):
+
+| Request | Result |
+| --- | --- |
+| `?variant=<Blue, withdrawn>` | → `/product/toothbrush-tube-clear`; zero occurrences of `MILDTHLU0072BU` in the page |
+| `?variant=<Clear, offered>` | No redirect — deep link still works |
+| `?variant=nonsense` | → `/product/toothbrush-tube-clear` |
+| `?variant=<Blue>&utm_source=newsletter&utm_campaign=spring` | → same, both utm params preserved |
+
+Before this change the same Blue link rendered
+`SKU: MILDTHLU0072BU · $45.55 · Add to Cart` and advertised that SKU in the
+Product JSON-LD.
+
 
 ---
 
@@ -831,7 +864,7 @@ permanently-failing scan is otherwise invisible.
 | **D-9** | `filterRegistry['gifts-toys']` maps a non-existent handle | **OPEN.** Inert |
 | **D-10** | Reviews tab is a permanent placeholder | **OPEN — with new information.** `reviews.rating` and `reviews.rating_count` exist as PUBLIC_READ definitions, so a real rating display is achievable without a third-party app. Out of scope here |
 | **D-11** | *Withdrawn.* Read as "`options.values` under-reports"; it was Shopify correctly hiding a withdrawn variant. The change was reverted and the correct behaviour pinned by tests | **NOT A DEFECT.** §6 |
-| **D-13** | The `variants` connection still returns a variant whose backing product is ARCHIVED and unpublished, `availableForSale: true`. Reachable via `?variant=`; could become the default if variant order changed | **OPEN — pre-existing.** §6.3 |
+| **D-13** | The `variants` connection returns variants withdrawn from this sales channel, `availableForSale: true` — reachable and purchasable via `?variant=` | **FIXED.** §6.3–6.4: variants narrowed to what is offered, stale variant links redirected |
 | **D-12** | Ancillary tag-scan failure 500s an otherwise-healthy page | **FIXED.** §12 |
 
 ### Shopify-side data issues (not code — do not fix in code)
