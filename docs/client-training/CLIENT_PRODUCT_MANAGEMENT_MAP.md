@@ -26,7 +26,7 @@ customers use.
 > **Shopify: Title**
 > **Website:** The large product heading, and the browser tab.
 > **Change this when:** The product name needs to change.
-> *If the product has multiple colours, the website adds the selected colour automatically — "Toothbrush Tube — Clear". You don't type that.*
+> *If the product has more than one colour, the website appends the selected one to the heading automatically — "Rollator — Blue". You don't type that. A product with a single colour gets no suffix.*
 
 > **Shopify: Description**
 > **Website:** The "Description" block inside the **Specifications** tab.
@@ -75,12 +75,16 @@ customers use.
 > **Website:** The gallery leads with the selected colour's own photo.
 > **Important:** On a **multi-colour** product, a colour with **no image assigned** shows a **placeholder** rather than another colour's photo. Assign an image to every colour.
 
-> ⚠️ **Watch for incomplete option values.** A product can end up with a variant
-> whose value is missing from the option list — that happened on the Toothbrush
-> Tube, where "Blue" existed as a variant but not as a Color option value. The
-> website now recovers those automatically so the variant is still buyable, but
-> it's worth fixing in Shopify when you spot it: open the product, and make sure
-> every variant's colour/size appears in the option's value list.
+> **Taking one colour off sale.** If you withdraw a colour — unpublishing or
+> archiving it — the website stops offering it, which is exactly right. The
+> Toothbrush Tube is the live example: Blue was taken off, so the product page
+> now shows Clear only and no colour selector at all, because there is only one
+> thing to choose.
+>
+> One thing to know: **the withdrawn colour is still attached to the product
+> underneath.** Customers can't reach it by browsing, but the old variant hasn't
+> been fully detached. If you want a colour gone completely rather than just
+> hidden, mention it to the dev team — there's a known gap we've written up.
 
 > **Shopify metafields: Order Size / Units per Order**
 > **Website:** The dark navy **UNIT / QUANTITY** box above Add to Cart, and the **Order Packaging** tab.

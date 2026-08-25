@@ -461,49 +461,51 @@ describe('ProductView — You May Also Need cards are clickable (Task 4)', () =>
   })
 })
 
-// Shopify's Product.options.values is not always complete on this store.
-// Verified live 2026-08-25 for toothbrush-tube-clear: one declared Color value
-// ("Clear") but two active, in-stock, separately-priced variants. Because the
-// selector was gated on options.values, it was suppressed entirely and the
-// second variant had no control that could select it.
-describe('ProductView — variants missing from options.values stay reachable', () => {
-  const underReportedOptions = [{ id: 'opt1', name: 'Color', values: ['Blue'] }]
+// Regression guard (2026-08-25). product.options.values is the AUTHORITATIVE
+// list of what may be chosen. On toothbrush-tube-clear the Storefront API
+// returns Color ["Clear"] while the variants connection still returns Clear AND
+// Blue, both availableForSale — because the merchant withdrew the separate
+// (now ARCHIVED) Blue product from this sales channel. options.values was
+// expressing that decision correctly; variants is the side that over-reports.
+//
+// A previous change "recovered" Blue from variant.selectedOptions and put a
+// deliberately-withdrawn product back on sale. These pin the correct behaviour.
+describe('ProductView — a withdrawn option value is not resurrected from variants', () => {
+  const withdrawnBlue = [{ id: 'opt1', name: 'Color', values: ['Blue'] }]
 
-  it('renders a button for the variant the option list omits', () => {
-    renderPDP(blueVariant, { options: underReportedOptions })
+  it('does not offer a variant whose option value Shopify has withdrawn', () => {
+    // Only "Blue" is offered, so the selector collapses entirely and White —
+    // still present in variants — gets no button. This is the toothbrush-tube
+    // case: one offered value, two variants.
+    renderPDP(blueVariant, { options: withdrawnBlue })
+    expect(screen.queryByRole('button', { name: 'Color: White' })).toBeNull()
+    expect(screen.queryByText('SELECT Color')).toBeNull()
+  })
+
+  it('offers exactly the listed values when a selector does render', () => {
+    // Two offered values, three variants — isolates "not widened" from the
+    // separate rule that hides a single-value selector.
+    const greenVariant: ProductVariant = {
+      ...blueVariant,
+      id: 'gid://shopify/ProductVariant/3',
+      title: 'Green',
+      selectedOptions: [{ name: 'Color', value: 'Green' }],
+    }
+    renderPDP(blueVariant, {
+      options: [{ id: 'opt1', name: 'Color', values: ['Blue', 'White'] }],
+      variants: { nodes: [blueVariant, whiteVariant, greenVariant] },
+    })
     expect(screen.getByRole('button', { name: 'Color: Blue' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Color: White' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Color: Green' })).toBeNull()
   })
 
-  it('shows the selector at all, instead of hiding it as a single-value option', () => {
-    renderPDP(blueVariant, { options: underReportedOptions })
-    expect(screen.getByText('SELECT Color')).toBeTruthy()
+  it('does not treat the product as multi-colour on the strength of a withdrawn variant', () => {
+    renderPDP(blueVariant, { options: withdrawnBlue })
+    expect(screen.getByRole('heading', { level: 1 }).textContent).not.toContain('—')
   })
 
-  it('lets the recovered variant actually be selected', () => {
-    renderPDP(blueVariant, { options: underReportedOptions })
-    fireEvent.click(screen.getByRole('button', { name: 'Color: White' }))
-    // These two fixtures share a SKU and differ by manufacturer number, so
-    // that is the identifier that proves the selection actually moved.
-    expect(screen.getByText('Mfr #: 10277WT')).toBeTruthy()
-  })
-
-  it('treats the product as multi-colour, so the title tracks the selection', () => {
-    renderPDP(blueVariant, { options: underReportedOptions })
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('— Blue')
-    fireEvent.click(screen.getByRole('button', { name: 'Color: White' }))
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain('— White')
-  })
-
-  it('leaves a genuinely single-variant product without a selector', () => {
-    renderPDP(blueVariant, {
-      options: [{ id: 'opt1', name: 'Title', values: ['Default Title'] }],
-      variants: { nodes: [{ ...blueVariant, selectedOptions: [{ name: 'Title', value: 'Default Title' }] }] },
-    })
-    expect(screen.queryByText('SELECT Title')).toBeNull()
-  })
-
-  it('is unchanged when options.values already covers every variant', () => {
+  it('still renders every value when Shopify does list them', () => {
     renderPDP(blueVariant)
     expect(screen.getByRole('button', { name: 'Color: Blue' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Color: White' })).toBeTruthy()

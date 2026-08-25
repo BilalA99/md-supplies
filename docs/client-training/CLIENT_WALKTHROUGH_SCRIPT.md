@@ -14,7 +14,11 @@ right. Have all three products open in tabs on both sides.
 > **This script matches the implementation on branch
 > `shopify-client-training-wiring`.** Every behaviour described was verified
 > rendering live. If you record before that branch is merged, the specifications
-> table and the Blue variant button will not be there.
+> table will not be there.
+>
+> **The toothbrush tube no longer has a colour selector** — Blue was withdrawn in
+> Shopify, so Clear is the only option. Variants are demonstrated on the gloves
+> instead (§3). Everything else still uses the tube.
 
 ---
 
@@ -43,8 +47,9 @@ right. Have all three products open in tabs on both sides.
 
 > **Title.** *(highlight, then point at the site heading)* That's the big heading.
 >
-> Notice Shopify says "Toothbrush Tube" and the site says "Toothbrush Tube —
-> Clear". The site adds the selected colour automatically. You never type that.
+> One thing worth mentioning: when a product genuinely has several colours, the
+> site appends the selected one to the heading automatically — you never type
+> that. This tube only has Clear now, so there's nothing appended here.
 >
 > **Description.** *(highlight)* This appears under the **Specifications** tab
 > *(click it)* — right here. Your bold, bullets and links all carry across.
@@ -70,33 +75,39 @@ right. Have all three products open in tabs on both sides.
 
 ## 3 — Variants and pricing *(1:50 – 2:50)*
 
-*Scroll to Variants in Shopify.*
+> ⚠️ **Demo on the GLOVES product, not the toothbrush tube.** The tube's Blue
+> colour has been withdrawn, so it now shows no colour selector at all — there is
+> only one thing to choose. The gloves have a live two-value Size option
+> (Small / XL) and are the right thing to demonstrate on.
 
-> This product comes in two colours — Clear and Blue. *(point to both variants)*
+*Open 100 Nitrile Exam Gloves in Shopify, Variants section.*
+
+> These gloves come in two sizes — Small and XL. *(point to both variants)*
 >
-> On the site: **SELECT COLOR**, with a Clear button at $46.30 and a Blue button
-> at $45.55. *(point)* That heading text comes from your option name, so whatever
-> you call the option is what customers read.
+> On the site: **SELECT SIZE**, with a button for each. *(point)* That heading
+> text comes from your option name, so whatever you call the option is what
+> customers read.
 >
-> *(click Blue on the site)*
+> *(click XL on the site)*
 >
-> The price updates, the SKU updates, the title suffix updates, and the address
-> quietly gains a variant parameter — so if you copy that link and send it to
-> someone, it opens on Blue.
+> The price updates, the SKU updates, and the address quietly gains a variant
+> parameter — so if you copy that link and send it to someone, it opens on XL.
 >
-> **Two things to watch on variants.**
+> **A couple of things to know about variants.**
 >
-> First, **every colour needs its own image.** On a multi-colour product, if a
-> colour has no image assigned, the site shows a grey placeholder — it
-> deliberately will *not* show a different colour's photo, because that misleads
-> the customer.
+> **Every colour needs its own image.** On a multi-colour product, if a colour has
+> no image assigned, the site shows a grey placeholder — it deliberately will
+> *not* show a different colour's photo, because that misleads the customer.
 >
-> Second — and this one's worth knowing. *(back to Shopify Variants)* Occasionally
-> a product ends up with a variant whose value isn't listed in the option itself.
-> That was actually the case here: Blue existed as a variant, but "Blue" was
-> missing from the Color option's list of values. The site now recovers those
-> automatically so the variant is still selectable and still buyable. But if you
-> notice it, it's worth tidying in Shopify.
+> *(switch to the Toothbrush Tube product page)*
+>
+> And here's the flip side, using the toothbrush tube. This one used to come in
+> Clear and Blue, and Blue has since been taken off. Look at the page — **no
+> colour selector at all**, just the Clear product. That's correct: there's only
+> one option now, so there's nothing to choose between.
+>
+> That's the general rule. **If you withdraw a colour or size in Shopify, the site
+> stops offering it.** You don't need to do anything else.
 >
 > And on pricing — a variant priced at zero shows **"Contact for pricing"** and
 > can't be added to the cart. That's deliberate: it's a quote-only item, not a
@@ -369,7 +380,13 @@ right. Have all three products open in tabs on both sides.
   They're the two sections most likely to need a retake, and they're the two the
   client most needs to be right.
 - The Toothbrush Tube has **no** specification metafields populated, which is why
-  §6 switches to the gloves. Don't try to demo specifications on the tube.
+  §6 switches to the gloves. Don't try to demo specifications on the tube. It
+  also has no colour selector any more (Blue withdrawn), which is why §3 uses the
+  gloves too — the tube appears in §3 only as the "withdrawn colour" example.
+- Don't say the withdrawn Blue variant is fully removed. It is hidden from
+  browsing but still attached to the product underneath; a customer with a direct
+  variant link could still reach it. That gap is written up as D-13 in the
+  technical map and has not been fixed.
 - The Toothbrush Tube has no "Frequently Bought With" row (no complementary
   products configured). If you want to show all three recommendation rows in §7,
   pick a product that has complementary products set — or narrate the absence.

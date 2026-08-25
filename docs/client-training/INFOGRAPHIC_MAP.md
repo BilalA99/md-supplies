@@ -39,9 +39,13 @@ Three callout labels:
 | --- | --- | --- |
 | **Title** | used as-is | → Product heading |
 | **Images** | variant image first, then the rest | → Product gallery |
-| **Variants** (Color, Size) | reconciled against the variants that exist | → Option buttons |
+| **Variants** (Color, Size) | only the option values Shopify offers | → Option buttons |
 | **Variant price** | per-variant | → Price, and the price on each button |
 | **Brand Name** *(metafield)* | `custom.brand_name` — never Vendor | → Teal brand line above the title |
+
+**Callout under Variants:**
+> *Withdraw a colour or size in Shopify and the site stops offering it. Leave one
+> option value and the selector disappears entirely — there is nothing to choose.*
 
 **Callout under Brand Name:**
 > *Vendor is who ships it. Brand Name is what customers see. They differ on about

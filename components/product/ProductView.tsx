@@ -23,7 +23,6 @@ import { useSelectedVariant } from './useSelectedVariant'
 import { resolveVariantValue, resolveVariantSupplement } from '@/lib/product/resolve-variant-value'
 import { shopifyRichTextToPlainParagraphs, shopifyRichTextToParagraphSpans, type RichTextSpan } from '@/lib/policy/rich-text'
 import { formatMetafieldValue } from '@/lib/shopify/metafield-value'
-import { hasMultipleColors, hasSelectableOptions, resolveProductOptions } from '@/lib/product/resolve-options'
 
 type Tab = 'SPECIFICATIONS' | 'ORDER PACKAGING' | 'VENDOR SHIPPING & RETURNS' | 'REVIEWS'
 const TABS: Tab[] = ['SPECIFICATIONS', 'ORDER PACKAGING', 'VENDOR SHIPPING & RETURNS', 'REVIEWS']
@@ -162,19 +161,28 @@ export function ProductView({ product, initialVariant, relatedProducts, compleme
 
   const variantSku = selectedVariant.sku || (selectedVariant.id.split('/').pop() ?? '')
 
-  // Options reconciled against the variants that actually exist — Shopify's
-  // `options.values` omits real variant values on this store (see
-  // lib/product/resolve-options.ts). Everything below that asks "what can be
-  // chosen?" must read THIS, not product.options, or an available variant
-  // becomes unreachable.
-  const effectiveOptions = resolveProductOptions(product.options, product.variants.nodes)
-
-  // LG-03: a color-neutral parent title must still show which color is
-  // selected, so the H1/breadcrumb can't contradict the SKU/image the
-  // shopper just picked. Only a genuine multi-value color dimension carries
-  // this identity risk — a single-color product or an Each/Case selection
-  // doesn't rename the product, so those get no suffix.
-  const isMultiColor = hasMultipleColors(effectiveOptions)
+  // `product.options.values` is the AUTHORITATIVE list of what may be chosen —
+  // it is deliberately NOT widened from product.variants.
+  //
+  // Read the whole story before changing this (2026-08-25). On
+  // toothbrush-tube-clear the Storefront API returns Color values ["Clear"]
+  // while the variants connection still returns BOTH Clear and Blue, each
+  // availableForSale with its own price and image. That looks like Shopify
+  // under-reporting, and a previous version of this file "fixed" it by
+  // recovering Blue from variant.selectedOptions.
+  //
+  // It was not a bug. Admin shows a separate ARCHIVED product,
+  // toothbrush-tube-lg-blue (SKU MILDTHLU0072BU, publishedAt null), and the
+  // merchant had deliberately taken Blue off this sales channel. Storefront's
+  // `options.values` was CORRECTLY expressing that decision; the variants
+  // connection is the side that over-reports, still listing a variant whose
+  // backing product is not published.
+  //
+  // So the offered set must never be widened from variants: doing so puts a
+  // deliberately-withdrawn product back on sale.
+  const isMultiColor = product.options.some(
+    (o) => o.name.toLowerCase() === 'color' && o.values.length > 1,
+  )
   const selectedColor = isMultiColor
     ? selectedVariant.selectedOptions.find((o) => o.name.toLowerCase() === 'color')?.value
     : undefined
@@ -214,7 +222,8 @@ export function ProductView({ product, initialVariant, relatedProducts, compleme
     return formatted ? [{ label, value: formatted }] : []
   })
 
-  const hasOptions = hasSelectableOptions(effectiveOptions)
+  const hasOptions = product.options.length > 0 &&
+    !(product.options.length === 1 && product.options[0].values.length === 1)
 
   // AeroWalk pilot: variant-specific order unit overrides the shared product
   // value; falls back to it only when the variant's own field is blank
@@ -410,7 +419,7 @@ export function ProductView({ product, initialVariant, relatedProducts, compleme
             {/* Variant selector */}
             {hasOptions && (
               <VariantSelector
-                options={effectiveOptions}
+                options={product.options}
                 variants={product.variants.nodes}
                 selectedVariant={selectedVariant}
                 onSelect={selectVariant}

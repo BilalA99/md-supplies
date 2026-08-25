@@ -63,7 +63,6 @@ Route (server)         app/product/[slug]/page.tsx
         ▼
 Display formatting     lib/shopify/metafield-value.ts  (list metafields → text)
                        lib/policy/rich-text.ts         (rich_text_field → paragraphs)
-                       lib/product/resolve-options.ts  (options reconciled to variants)
         │
         ▼
 Components (client)    components/product/ProductView.tsx
@@ -150,8 +149,8 @@ blocking a request on 30 API calls.
 
 | Shopify label | GraphQL field | Customer sees it | Status |
 | --- | --- | --- | --- |
-| Option name/values | `options { name values }` | "SELECT COLOR" heading + buttons — **reconciled against variants first**, §6 | **CURRENTLY USED** |
-| Variant selected options | `variants.nodes.selectedOptions` | **Authoritative source of option values** (§6) | **CURRENTLY USED** |
+| Option name/values | `options { name values }` | "SELECT COLOR" heading + buttons — **authoritative; never widened from variants**, §6 | **CURRENTLY USED** |
+| Variant selected options | `variants.nodes.selectedOptions` | Matches a chosen value to its variant. **Not** a source of offered values (§6) | **CURRENTLY USED** |
 | Variant SKU | `variants.nodes.sku` | "SKU:" line, "Internal SKU", schema `sku` | **CURRENTLY USED** |
 | Variant price | `variants.nodes.price` | Main price + per-button price | **CURRENTLY USED** |
 | Compare-at price | `variants.nodes.compareAtPrice` | Strikethrough + "Save N%" | **CURRENTLY USED** |
@@ -463,39 +462,67 @@ URL-supplied filter object is pattern-checked (`lib/filter-registry.ts:146-156`)
 
 ## 6. Variants and options — CHANGED ON THIS BRANCH
 
-### 6.1 The defect
+### 6.1 `options.values` is authoritative — and why that is not obvious
 
 Verified live for `toothbrush-tube-clear`:
 
 ```text
-options:  [{ name: "Color", values: ["Clear"] }]        ← ONE value
-variants: Clear (MILDTHLU0072NU, Color=Clear, own image, $46.30, in stock)
-          Blue  (MILDTHLU0072BU, Color=Blue,  own image, $45.55, in stock)
+Storefront API
+  options:  [{ name: "Color", values: ["Clear"] }]      ← ONE value
+  variants: Clear (MILDTHLU0072NU, Color=Clear, $46.30, availableForSale: true)
+            Blue  (MILDTHLU0072BU, Color=Blue,  $45.55, availableForSale: true)
+
+Admin API
+  parent  toothbrush-tube-clear     ACTIVE, published to "Md Supplies Headless"
+          Color optionValues: Clear, Blue      variants: Clear, Blue
+  child   toothbrush-tube-lg-blue   ARCHIVED, publishedAt: null   SKU MILDTHLU0072BU
 ```
 
-Shopify's `Product.options.values` is a denormalized convenience field, and on
-this store it is **not always complete**. Because `ProductView` gated the
-selector on `options[0].values.length === 1`, the entire colour selector was
-suppressed and **the Blue variant had no control that could select it** — an
-active, in-stock, separately-priced product a customer could not buy from its own
-page. It also made `isMultiColor` false, which dropped the ` — Colour` title
-suffix and re-enabled the shared-gallery fallback that exists to stop one
-colour's photo standing in for another.
+The two APIs disagree, and the disagreement is **meaningful, not a bug**. There
+is a separate product for the Blue tube, it is ARCHIVED and published to no
+channel, and the merchant withdrew it deliberately. Storefront's
+`options.values` is expressing exactly that decision by omitting Blue.
 
-### 6.2 The fix
+**It is the `variants` connection that over-reports**, still returning a variant
+whose backing product is unpublished — and still reporting it
+`availableForSale: true`.
 
-`lib/product/resolve-options.ts:33` reconciles the declared option values against
-`variant.selectedOptions`, which is the authoritative statement of what a variant
-*is*. The declared list is still honoured for **order**; values a variant carries
-but the list omits are appended. It only ever **widens** — a declared value with
-no matching variant is preserved (the selector already renders it disabled)
-rather than silently dropped.
+> **This was misdiagnosed once, and the mistake is worth recording.** An earlier
+> pass on this branch read the short `options.values` list as Shopify
+> under-reporting, and "fixed" it by recovering Blue from
+> `variant.selectedOptions`. That put a deliberately-withdrawn product back on
+> sale, with a working price and Add to Cart button. The change was reverted.
+>
+> The rule that follows: **a value missing from `options.values` is a
+> merchandising decision, not a data gap.** Never widen the offered set from
+> `variants`.
 
-Consumed at `ProductView.tsx:170` (and the same reconciliation inside
-`useSelectedVariant`, so the gallery cannot disagree).
+### 6.2 Current behaviour
 
-**Verified rendering after the fix:** H1 `Toothbrush Tube (MILDTHLU0072NU) — Clear`,
-`SELECT Color`, two buttons — `Clear $46.30` and `Blue $45.55`.
+`ProductView` reads `product.options` directly. A single declared value means no
+selector, which is correct for this product: Clear is the only thing offered.
+
+`components/product/ProductView.tsx` carries the full note, and
+`components/product/__tests__/ProductView.test.tsx` pins it with four regression
+tests so the "fix" cannot be reintroduced.
+
+### 6.3 Residual risk — OPEN, not fixed here
+
+Because `variants` still contains the withdrawn variant, it remains reachable
+outside the selector:
+
+- `?variant=<withdrawn gid>` is accepted by `resolveInitialVariant`, which would
+  render its SKU, price and Add to Cart.
+- `getDefaultVariant` picks the first **purchasable** variant. Clear is first for
+  this product, so it wins today — but that is ordering luck, not a guarantee.
+- `ProductSchema` would describe the withdrawn variant in that state.
+
+This is **pre-existing** and was not introduced or fixed on this branch. The
+targeted fix would be to *narrow* `product.variants` to those whose
+`selectedOptions` all appear in `options.values` — the inverse of the reverted
+change. It is deliberately left as a recommendation rather than shipped
+speculatively, since this is the second reading of the same signal and it
+deserves a decision rather than another inference.
 
 ### 6.3 The rest of the chain
 
@@ -504,7 +531,7 @@ Consumed at `ProductView.tsx:170` (and the same reconciliation inside
 | Heading text | `` `SELECT ${option.name}` `` | `VariantSelector.tsx:41` |
 | Price per button | matched variant's `price` | `VariantSelector.tsx:87` |
 | Button disabled | `resolvePurchasable()` — price ≤ 0 **or** not `availableForSale` | `VariantSelector.tsx:65` |
-| Selector hidden | one option with one value (after reconciliation) | `hasSelectableOptions` |
+| Selector hidden | one option with one value | `ProductView.tsx` |
 | Initial selection | `?variant=<gid>`, else first **purchasable** variant | `lib/product/resolve-variant.ts` |
 | Selection persistence | `router.replace('?variant=…', { scroll: false })` | `useSelectedVariant.ts:56` |
 | Title suffix | ` — <Color>` when a Color option has >1 value | `ProductView.tsx:177` |
@@ -803,7 +830,8 @@ permanently-failing scan is otherwise invisible.
 | **D-8** | Dead components (`SpecsTable`, `ProductInfo`, `PackagingTable`, `ProductDescription`, `RelatedProducts`, `ProductVariantSelector`, `QuantityAddToCart`) | **OPEN.** Imported by nothing; left alone as out of scope |
 | **D-9** | `filterRegistry['gifts-toys']` maps a non-existent handle | **OPEN.** Inert |
 | **D-10** | Reviews tab is a permanent placeholder | **OPEN — with new information.** `reviews.rating` and `reviews.rating_count` exist as PUBLIC_READ definitions, so a real rating display is achievable without a third-party app. Out of scope here |
-| **D-11** | `options.values` under-reports variants, making an in-stock variant unbuyable | **FIXED.** §6 |
+| **D-11** | *Withdrawn.* Read as "`options.values` under-reports"; it was Shopify correctly hiding a withdrawn variant. The change was reverted and the correct behaviour pinned by tests | **NOT A DEFECT.** §6 |
+| **D-13** | The `variants` connection still returns a variant whose backing product is ARCHIVED and unpublished, `availableForSale: true`. Reachable via `?variant=`; could become the default if variant order changed | **OPEN — pre-existing.** §6.3 |
 | **D-12** | Ancillary tag-scan failure 500s an otherwise-healthy page | **FIXED.** §12 |
 
 ### Shopify-side data issues (not code — do not fix in code)
