@@ -11,9 +11,10 @@ customers use.
 
 1. **Not every field in Shopify shows on the website.** Some are for Google
    Shopping, some are for filters only, a few aren't used. This guide says which.
-2. **Changes appear within seconds to a few minutes** — including category
-   changes. (If you find something still stale after 5 minutes, tell the dev
-   team: it means a Shopify webhook needs re-registering.)
+2. **Product changes appear in about 5 minutes. Category changes take up to an
+   hour.** That's normal — don't start changing other fields to force it. (The
+   code to make category changes instant is built but not switched on yet; ask
+   the dev team.)
 3. **Putting a product in a category takes two things,** not one. See
    "Where the product appears" below. This is the single most important section.
 
@@ -286,15 +287,14 @@ held in the site's code. If a category SEO change doesn't appear, that's why.
 **To put a product on the website:**
 
 1. Set Status to **Active**.
-2. In **Publishing**, make sure it's published to the sales channel the website
-   uses. *(Confirm the exact channel name with your developer — if it's not
-   ticked, the product 404s no matter what else is right.)*
+2. In **Publishing**, make sure it's published to **Md Supplies Headless** —
+   that's the sales channel our website reads. If it isn't ticked, the product
+   won't appear at all, no matter what else is right.
 3. Add the `category:` tag, and the `subcategory:` tag if one fits.
 4. Add the plain collection-membership tag (e.g. `Shower Commode`), or add it to
    the collection directly.
 5. Fill in the metafields that apply.
-6. Check the product page, then the category page. Both should be current within
-   a few minutes.
+6. Check the product page (~5 minutes), then the category page (up to an hour).
 
 **To take a product off the website:**
 
@@ -371,4 +371,5 @@ held in the site's code. If a category SEO change doesn't appear, that's why.
 | Free Shipping badge not showing | The shipping data must also confirm it |
 | Filter didn't appear | The metafield must be "filterable" in Shopify **and** allowlisted in code |
 | Category page SEO title ignored | Category SEO is often overridden in code |
-| Anything still stale after 5 minutes | Tell the dev team — a Shopify webhook may need re-registering |
+| Product change stale after ~5 min | Worth flagging to the dev team |
+| Category change not showing yet | Normal for up to an hour — don't force it by editing other fields |

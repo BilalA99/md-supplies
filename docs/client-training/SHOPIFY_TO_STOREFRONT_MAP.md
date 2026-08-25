@@ -116,12 +116,18 @@ Invalidation uses the `'max'` (stale-while-revalidate) profile, so a burst of
 product edits serves stale data while refreshing in the background rather than
 blocking a request on 30 API calls.
 
-> **UNVERIFIED / NEEDS FOLLOW-UP.** Whether `products/create`,
-> `products/update`, `products/delete`, `collections/update` are actually
-> registered as webhooks against `POST /api/revalidate` on the production store
-> is a Shopify Admin setting, not a repository fact. **The code fix is inert
-> until they are.** Confirm in Shopify Admin → Settings → Notifications →
-> Webhooks. Without them, everything falls back to the TTLs above.
+> **CONFIRMED NOT REGISTERED (2026-08-25).** An Admin API
+> `webhookSubscriptions` query returns **zero subscriptions** on this store — no
+> `products/*`, no `collections/*`, nothing. **So the invalidation fix above is
+> built but currently inert**, and real propagation today is the TTL column:
+> ~5 minutes for product and collection data, **up to 1 hour for category
+> placement**.
+>
+> Registering them is a production Shopify change and needs two things this
+> repository cannot supply: the deployed public URL for `POST /api/revalidate`,
+> and a signing secret matching `SHOPIFY_WEBHOOK_SECRET` in the deployed
+> environment. A mismatched secret is indistinguishable from no webhook — the
+> route returns 401 and the cache silently keeps serving stale data.
 
 ---
 
@@ -819,10 +825,10 @@ handle and `notFound()`s on null (`app/product/[slug]/page.tsx:91`).
 record and order history. Deleting is irreversible and breaks historical order
 references.
 
-> **UNVERIFIED / NEEDS FOLLOW-UP.** The exact sales-channel name this store's
-> Storefront token is bound to is a Shopify Admin setting, not a repository fact.
-> Confirm in Shopify Admin → Apps and sales channels before stating it to the
-> client.
+> **CONFIRMED (2026-08-25): the sales channel is "Md Supplies Headless".** The
+> store's publications are Online Store, Shop, Point of Sale, Google & YouTube,
+> Inbox and Md Supplies Headless; the reference product is published to that last
+> one. It is the channel the client must tick for a product to appear.
 
 ---
 
@@ -881,8 +887,8 @@ permanently-failing scan is otherwise invisible.
 
 | Item | Why it is still open |
 | --- | --- |
-| **Are the Shopify webhooks registered?** | Admin setting. D-7's fix is inert without them — the single highest-value thing to confirm |
-| Sales-channel name for the Storefront token | Admin setting (§11) |
+| **Register the Shopify webhooks** | Answered: there are none. D-7's fix stays inert until they exist. Needs the deployed URL + matching secret — highest-value remaining action |
+
 | What `intent: RELATED` weighs | Shopify-internal (§9) |
 | Canonical RX tag | `labels.ts:41` — both `compliance:rx-only` and `rx-required` are live; "PENDING IZZY: confirm the canonical RX tag and retire the other" |
 | Insulin-syringe RX exemption | `rx-gate.ts:73` — scaffolded, returns `false` |

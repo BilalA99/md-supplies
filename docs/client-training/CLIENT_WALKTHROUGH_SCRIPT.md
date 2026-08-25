@@ -1,6 +1,7 @@
 # Client Walkthrough — Video Script
 
-**Runtime:** ~8–9 minutes
+**Runtime:** ~19 minutes as written. See "Filming a shorter cut" below to get
+it to ~10.
 **Primary example:** Dawn Mist Toothbrush Tube (`MILDTHLU0072NU`),
 `/product/toothbrush-tube-clear`
 **Second example (for specifications):** 100 Nitrile Exam Gloves (`MED MNE5052`)
@@ -10,6 +11,51 @@
 right. Have all three products open in tabs on both sides.
 
 *Stage directions in italics. Everything else is spoken.*
+
+## Before you hit record
+
+**The branch must be deployed or running locally.** Two things in this script do
+not exist on `main`: the **Specifications table** (§6) and the **withdrawn-colour
+behaviour** (§3). Both are on `shopify-client-training-wiring`. If you film
+against plain `main`, §6 shows an empty tab and §3's claim is wrong.
+
+Have these open, Shopify Admin on the left, site on the right:
+
+| Product | Used in | Why that one |
+| --- | --- | --- |
+| **Toothbrush Tube** `toothbrush-tube-clear` | §2, §3, §4, §5 | The main thread. Has brand, packaging, Shipping & Returns, both tag types, and the withdrawn Blue colour |
+| **100 Nitrile Exam Gloves** `100-nitrile-exam-gloves-pf-text-finger-cobalt-blue-small` | §3, §6 | The only one with a live two-value option (Size S/XL) **and** five populated spec rows |
+| **Shower Commode** `folding-rehab-shower-commode-low-back-24in` | §4 | Cleanest example of the two-tag rule |
+| *(optional)* **12 Panel Rapid Cups** `12-panel-multi-drug-rapid-cups-clia-mdrc-12` | §6 | Twelve detectable drugs — makes the spec table land |
+
+**Three facts to have straight before you speak:**
+
+1. The sales channel is **"Md Supplies Headless"**. Say it exactly.
+2. **Category changes take up to an hour** right now. Do not say "within
+   minutes" — the instant-refresh code is built but not switched on.
+3. The Toothbrush Tube has **no colour selector** any more, and **no spec
+   metafields**. That is why §3 and §6 both switch to the gloves.
+
+---
+
+## Filming a shorter cut
+
+The full script runs ~19 minutes. If you want ~10, film it as **two videos** —
+that is the better outcome anyway, because part 1 is what Juliette will rewatch:
+
+| Cut | Sections | Runtime |
+| --- | --- | --- |
+| **Part 1 — "Where products go"** | 1, 2, 4, 8, 9 | ~10 min |
+| **Part 2 — "Product detail"** | 3, 5, 6, 7 | ~9 min |
+
+If it has to be one video, cut in this order and you land near 11 minutes:
+
+1. **§3's pricing tail** (the $0 / "Contact for pricing" paragraph) — edge case
+2. **§7 entirely** — recommendations are read-only for her day to day
+3. **§5's Customer Filter Category paragraph** — it is in the written guide
+4. **§6 down to one product** — show the gloves, drop the drug-test cup
+
+**Do not cut §4.** It is the reason for the video.
 
 > **This script matches the implementation on branch
 > `shopify-client-training-wiring`.** Every behaviour described was verified
@@ -22,7 +68,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 1 — Shopify vs the custom site *(0:00 – 0:30)*
+## 1 — Shopify vs the custom site *(0:00 – 0:50)*
 
 *Both windows visible.*
 
@@ -41,7 +87,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 2 — Product basics *(0:30 – 1:50)*
+## 2 — Product basics *(0:50 – 2:30)*
 
 *Shopify Admin, Toothbrush Tube, top of the page.*
 
@@ -73,7 +119,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 3 — Variants and pricing *(1:50 – 2:50)*
+## 3 — Variants and pricing *(2:30 – 6:00)*
 
 > ⚠️ **Demo on the GLOVES product, not the toothbrush tube.** The tube's Blue
 > colour has been withdrawn, so it now shows no colour selector at all — there is
@@ -131,7 +177,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 4 — Categories *(2:50 – 4:40)*
+## 4 — Categories *(6:00 – 10:30)*  ← the important one
 
 > **This is the most important section, so I'm going to go slowly, and I'm going
 > to correct something that has confused all of us.**
@@ -154,10 +200,12 @@ right. Have all three products open in tabs on both sides.
 >
 > And I want to be direct about this one, because I know at one point changing
 > Product Type and hitting Save seemed to make a product appear. **That was a
-> coincidence.** What was actually happening: category changes were taking up to
-> an hour to show up, so a change you'd made earlier surfaced right after an
-> unrelated Save. That delay has now been fixed — category changes appear within
-> minutes. Product Type had nothing to do with it.
+> coincidence.** Category changes can take up to an hour to show up, so a change
+> you'd made earlier surfaced right after an unrelated Save. Product Type had
+> nothing to do with it.
+>
+> So if you change a category tag and the site looks the same — **that's normal,
+> give it an hour.** Don't go changing other fields to try to force it.
 >
 > One more warning on that: our category pages *do* have a filter called "Type" —
 > but that's a **different field**, a metafield also called Type. Easy to mix up.
@@ -203,7 +251,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 5 — Metafields that matter *(4:40 – 6:00)*
+## 5 — Metafields that matter *(10:30 – 13:30)*
 
 *Scroll to the pinned metafields.*
 
@@ -251,7 +299,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 6 — Specifications *(6:00 – 6:50)*
+## 6 — Specifications *(13:30 – 15:00)*
 
 *Switch to the Nitrile Exam Gloves product, Shopify side.*
 
@@ -288,7 +336,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 7 — Related and complementary products *(6:50 – 7:30)*
+## 7 — Related and complementary products *(15:00 – 16:00)*
 
 *Scroll to the bottom of a product page.*
 
@@ -312,7 +360,7 @@ right. Have all three products open in tabs on both sides.
 
 ---
 
-## 8 — Adding a new product *(7:30 – 8:20)*
+## 8 — Adding a new product *(16:00 – 18:00)*
 
 > Your checklist for a new product.
 >
@@ -334,26 +382,26 @@ right. Have all three products open in tabs on both sides.
 > *and* build the filters.
 >
 > **Five — publish.** Set the status to **Active**, and in the Publishing section
-> make sure it's published to the sales channel the website uses. That part is
-> essential: if it's not ticked, the product won't exist on the site no matter how
-> perfect everything else is.
+> make sure it's published to **Md Supplies Headless**. That's the sales channel
+> our website reads. It's essential: if that one isn't ticked, the product won't
+> exist on the site no matter how perfect everything else is.
 >
-> **Six — check it.** Open the product page, then the category page. Both should
-> be current within a few minutes.
+> **Six — check it.** Open the product page first — that updates within about five
+> minutes. Then check the category page, and give that one **up to an hour**,
+> because the site rebuilds the whole category structure on a slower cycle.
 >
-> And that's the other thing that's changed: **you no longer have to wait an
-> hour** to find out whether a category change worked. If something's still stale
-> after about five minutes, that's worth telling the dev team about.
+> So: product page, five minutes. Category placement, up to an hour. If it's
+> still wrong well past that, that's worth flagging.
 
 ---
 
-## 9 — Updating and removing a product *(8:20 – 8:50)*
+## 9 — Updating and removing a product *(18:00 – 19:15)*
 
-> **Updating** — just edit and save. Changes appear within a few minutes,
-> including category changes.
+> **Updating** — just edit and save. Most changes appear within about five
+> minutes. Category and subcategory tag changes are the slow one — up to an hour.
 >
 > **Removing something discontinued** — **set the status to Draft.** That's it. It
-> disappears from the website within a few minutes and it's completely
+> disappears from the website within about five minutes and it's completely
 > reversible: flip it back to Active and it returns.
 >
 > **Please don't delete products.** Deleting is permanent and breaks the link
@@ -375,12 +423,15 @@ right. Have all three products open in tabs on both sides.
 
 **Accuracy**
 
-- Confirm the **sales channel name** with the dev team before recording §8 step
-  five, and say the real name instead of "the sales channel the website uses".
-- §4's "category changes appear within minutes" and §8's "no longer wait an hour"
-  are **true only once the Shopify webhooks are registered** against
-  `POST /api/revalidate`. Confirm that before recording — if they are not yet
-  registered, cut both lines and say "within the hour".
+- The sales channel is **"Md Supplies Headless"** — confirmed against the store,
+  2026-08-25. It is named in §8 step five; say it exactly.
+- **Timing in this script is the CURRENT, pre-webhook reality**: ~5 minutes for a
+  product page, **up to an hour** for category placement. Checked 2026-08-25: the
+  store has **zero webhook subscriptions**, so the instant-invalidation path is
+  built but not switched on. Do not promise "within minutes" for category changes.
+- If the webhooks get registered before you film, the faster wording becomes
+  true and §4, §8 step six and §9 can each drop to "within a few minutes". Ask
+  the dev team which state you are in on the day.
 - Don't promise a reviews feature date. The Reviews tab is still a placeholder.
 - Don't imply Free Shipping changes checkout charges — it is display only.
 - If asked about Custom Badge 1/2/3 or Custom Dynamic Badge, the honest answer is
